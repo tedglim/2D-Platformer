@@ -37,8 +37,6 @@ public class PlayerScript : MonoBehaviour
     public float fireStart = .5f;
     private bool shotFire = false;
     public float shootFireTime = .25f;
-    
-    private bool noBuffer;
 
 
 
@@ -59,8 +57,6 @@ public class PlayerScript : MonoBehaviour
 
         wantsFire = false;
         fireRelease = fireStart;
-        
-        noBuffer = !wantsDash && !wantsJump && !wantsFire;
     }
 
     void Update()
