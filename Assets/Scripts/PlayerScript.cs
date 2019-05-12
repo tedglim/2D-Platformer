@@ -31,7 +31,6 @@ public class PlayerScript : MonoBehaviour
     public float jumpPower = 75000f;
 
     private bool wantsFire;
-    private bool isFiring;
     public Transform firePoint;
     public GameObject firePrefab;
     private float fireRelease;
@@ -60,7 +59,6 @@ public class PlayerScript : MonoBehaviour
 
         wantsFire = false;
         fireRelease = fireStart;
-        isFiring = false;
         
         noBuffer = !wantsDash && !wantsJump && !wantsFire;
     }
@@ -145,7 +143,7 @@ public class PlayerScript : MonoBehaviour
 
     private void CheckFire()
     {
-        if (Input.GetButtonDown("Fire1") && onStage && !wantsDash && !wantsJump)
+        if (Input.GetButtonDown("Fire1") && !wantsDash && !wantsJump && rb2d.velocity.y == 0.0f)
         {
             wantsFire = true;
         }
@@ -155,7 +153,6 @@ public class PlayerScript : MonoBehaviour
     {
         anim.SetBool("isRunning", isRunning);
         anim.SetBool("isGrounded", onStage);
-        anim.SetBool("isFiring", isFiring);
         anim.SetFloat("yVel", rb2d.velocity.y);
     }
 
@@ -169,7 +166,7 @@ public class PlayerScript : MonoBehaviour
         if (wantsDash)
         {
             Dash();
-        } else if (wantsFire && rb2d.velocity.y == 0.0f)
+        } else if (wantsFire)
         {
             rb2d.velocity = Vector2.zero;
             Fire();
@@ -214,7 +211,6 @@ public class PlayerScript : MonoBehaviour
         if (fireRelease == fireStart)
         {
             shotFire = false;
-            isFiring = true;
             anim.SetTrigger("Fire");
             fireRelease -= Time.deltaTime;
         } else if (fireRelease < fireStart && fireRelease > 0)
@@ -228,7 +224,6 @@ public class PlayerScript : MonoBehaviour
         } else if (fireRelease <= 0)
         {
             wantsFire = false;
-            isFiring = false;
             fireRelease = fireStart;
         }
     }
