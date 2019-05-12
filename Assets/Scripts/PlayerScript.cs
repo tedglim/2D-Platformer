@@ -16,39 +16,30 @@ public class PlayerScript : MonoBehaviour
 
     private bool wantsDash;
     private float dashTime;
-    public float startDashTime = 0.25f;
-    public float dashSpeed = 2000;
+    public float startDashTime = 0.15f;
+    public float dashSpeed = 3500;
     public GhostScript ghost;
 
     private bool wantsJump;
     private bool canJump;
-    private bool isGrounded;
-    public Transform groundCheck;
-    public LayerMask whatIsGround;
+    private bool onStage;
+    public Transform stageCheck;
+    public float stageCheckRadius = .5f;
+    public LayerMask whatIsStage;
     private int jumpsLeft;
     public int totalJumps = 1;
-    public float jumpPower = 5000f;
+    public float jumpPower = 75000f;
 
-
-    public float groundCheckRadius = .5f;
-
-
-    public Transform firePoint;
-
-    public GameObject firePrefab;
-
-
-
-    private float prevDirection;
-
-
-    private bool isShooting;
     private bool wantsFire;
-    public float fireAttackDelay = .25f;
     private bool isFiring;
-    private bool wantsDashRight;
-    private bool wantsDashLeft;
-    public float dashAttackDelay = .25f;
+    public Transform firePoint;
+    public GameObject firePrefab;
+    private float fireRelease;
+    public float fireStart = .5f;
+    private bool shotFire = false;
+    public float shootFireTime = .25f;
+    
+    private bool noBuffer;
 
 
 
@@ -58,12 +49,20 @@ public class PlayerScript : MonoBehaviour
         rb2d = this.GetComponent<Rigidbody2D>();
         anim = this.GetComponent<Animator>();
         isFacingRight = true;
+
         wantsDash = false;
         dashTime = startDashTime;
+
         jumpsLeft = totalJumps;
         wantsJump = false;
         canJump = false;
-        isGrounded = false;
+        onStage = false;
+
+        wantsFire = false;
+        fireRelease = fireStart;
+        isFiring = false;
+        
+        noBuffer = !wantsDash && !wantsJump && !wantsFire;
     }
 
     void Update()
@@ -80,17 +79,14 @@ public class PlayerScript : MonoBehaviour
 
     private void CheckInputs()
     {
-        if(!wantsDash)
+        if (!wantsDash)
         {
             moveDirection = Input.GetAxisRaw("Horizontal");
         }
         CheckMovementDirection();
         CheckDash();
         CheckJump();
-        // if (Input.GetButtonDown("Fire1"))
-        // {
-        //     wantsFire = true;
-        // }
+        CheckFire();
     }
 
     private void CheckMovementDirection()
@@ -98,8 +94,7 @@ public class PlayerScript : MonoBehaviour
         if (isFacingRight && moveDirection < 0)
         {
             Flip();
-        }
-        else if (!isFacingRight && moveDirection > 0)
+        } else if (!isFacingRight && moveDirection > 0)
         {
             Flip();
         }
@@ -114,7 +109,7 @@ public class PlayerScript : MonoBehaviour
 
     private void Flip()
     {
-        if(!anim.GetCurrentAnimatorStateInfo(0).IsName("SNinja_DashAttack"))
+        if (!wantsFire && !wantsDash)
         {
             isFacingRight = !isFacingRight;
             transform.Rotate(0.0f, 180.0f, 0.0f);
@@ -123,7 +118,7 @@ public class PlayerScript : MonoBehaviour
 
     private void CheckDash()
     {
-        if(moveDirection != 0 && Input.GetKeyDown(KeyCode.RightShift))
+        if (moveDirection != 0 && Input.GetKeyDown(KeyCode.RightShift) && !wantsFire && !wantsDash)
         {
             wantsDash = true;
         }
@@ -131,11 +126,11 @@ public class PlayerScript : MonoBehaviour
 
     private void CheckJump()
     {
-        if (Input.GetButtonDown("Jump"))
+        if (Input.GetButtonDown("Jump") && !wantsDash && !wantsFire && jumpsLeft > 0)
         {
             wantsJump = true;
         }
-        if (isGrounded && rb2d.velocity.y <= 0)
+        if (onStage && rb2d.velocity.y <= 0)
         {
             jumpsLeft = totalJumps;
         }
@@ -148,45 +143,41 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
+    private void CheckFire()
+    {
+        if (Input.GetButtonDown("Fire1") && onStage && !wantsDash && !wantsJump)
+        {
+            wantsFire = true;
+        }
+    }
+
     void UpdateAnimations()
     {
         anim.SetBool("isRunning", isRunning);
-        anim.SetBool("isGrounded", isGrounded);
+        anim.SetBool("isGrounded", onStage);
+        anim.SetBool("isFiring", isFiring);
         anim.SetFloat("yVel", rb2d.velocity.y);
     }
 
     private void CheckSurroundings()
     {
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, whatIsGround);
+        onStage = Physics2D.OverlapCircle(stageCheck.position, stageCheckRadius, whatIsStage);
     }
 
     private void doMovement()
     {
-        if(!wantsDash)
+        if (wantsDash)
+        {
+            Dash();
+        } else if (wantsFire && !wantsJump)
+        {
+            rb2d.velocity = Vector2.zero;
+            Fire();
+        } else
         {
             rb2d.velocity = new Vector2(moveSpeed * moveDirection * Time.deltaTime, rb2d.velocity.y);
             Jump();
-        } else
-        {
-            Dash();
         }
-
-        // if(anim.GetCurrentAnimatorStateInfo(0).IsName("SNinja_DashAttack"))
-        // {
-        //     Dash();
-        // } else {
-        // rb2d.velocity = new Vector2(moveSpeed * moveDirection * Time.deltaTime, rb2d.velocity.y);
-        //     Dash();
-        // }
-        // if(!anim.GetCurrentAnimatorStateInfo(0).IsName("SNinja_Fire"))
-        // {
-        //     rb2d.velocity = new Vector2(moveSpeed * moveDirection, rb2d.velocity.y);
-        //     Jump();
-        //     Shoot();
-        //     Dash();
-        // } else {
-        //     rb2d.velocity = Vector2.zero;
-        // }
     }
 
     private void Jump()
@@ -201,9 +192,9 @@ public class PlayerScript : MonoBehaviour
 
     private void Dash()
     {
-        if(wantsDash)
+        if (wantsDash)
         {
-            if(dashTime <= 0)
+            if (dashTime <= 0)
             {
                 dashTime = startDashTime;
                 rb2d.velocity = Vector2.zero;
@@ -218,25 +209,33 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
-    private void Shoot()
+    private void Fire()
     {
-        if(wantsFire && isGrounded)
+        if (fireRelease == fireStart)
         {
-            StartCoroutine(ShootDelay());
+            shotFire = false;
+            isFiring = true;
+            anim.SetTrigger("Fire");
+            fireRelease -= Time.deltaTime;
+        } else if (fireRelease < fireStart && fireRelease > 0)
+        {
+            fireRelease -= Time.deltaTime;
+            if (fireRelease <= shootFireTime && shotFire == false)
+            {
+                Instantiate(firePrefab, firePoint.position, firePoint.rotation);
+                shotFire = true;
+            }
+        } else if (fireRelease <= 0)
+        {
+            wantsFire = false;
+            isFiring = false;
+            fireRelease = fireStart;
         }
-    }
-
-    public IEnumerator ShootDelay()
-    {
-        anim.SetTrigger("Fire");
-        wantsFire=false;
-        yield return new WaitForSeconds(fireAttackDelay);
-        Instantiate(firePrefab, firePoint.position, firePoint.rotation);
     }
 
     private void OnDrawGizmos()
     {
-        Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+        Gizmos.DrawWireSphere(stageCheck.position, stageCheckRadius);
     }
 
 }

@@ -9,7 +9,7 @@ public class FireScript : MonoBehaviour
     private Rigidbody2D rb2d;
     void Awake()
     {
-        rb2d = GetComponent<Rigidbody2D>();
+        Rigidbody2D rb2d = GetComponent<Rigidbody2D>();
         rb2d.velocity = transform.right * fireSpeed;
     }
 
@@ -22,16 +22,5 @@ public class FireScript : MonoBehaviour
             enemy.TakeDamage(damage);
         }
         Destroy(gameObject);
-    }
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }
