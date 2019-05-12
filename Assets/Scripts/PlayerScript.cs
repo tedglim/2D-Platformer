@@ -169,7 +169,7 @@ public class PlayerScript : MonoBehaviour
         if (wantsDash)
         {
             Dash();
-        } else if (wantsFire && !wantsJump)
+        } else if (wantsFire && rb2d.velocity.y == 0.0f)
         {
             rb2d.velocity = Vector2.zero;
             Fire();
