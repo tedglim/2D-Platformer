@@ -31,7 +31,7 @@ public class EnemyMaceScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        CheckPlayerFound();
+        // CheckPlayerFound();
     }
 
     private void CheckPlayerFound()
@@ -51,14 +51,14 @@ public class EnemyMaceScript : MonoBehaviour
 
     void FixedUpdate()
     {
-        if(!playerFound)
-        {
-            transform.position = Vector2.MoveTowards(transform.position, new Vector2 (target.position.x, transform.position.y), speed * Time.deltaTime);
-        } else if(playerFound)
-        {
-            rb2d.MovePosition((Vector2)transform.position + Vector2.down * speed * Time.deltaTime);
-            //return up
-        }
+        // if(!playerFound)
+        // {
+        //     transform.position = Vector2.MoveTowards(transform.position, new Vector2 (target.position.x, transform.position.y), speed * Time.deltaTime);
+        // } else if(playerFound)
+        // {
+        //     rb2d.MovePosition((Vector2)transform.position + Vector2.down * speed * Time.deltaTime);
+        //     //return up
+        // }
     }
 
     public void TakeDamage (int damage)

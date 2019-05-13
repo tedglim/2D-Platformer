@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Threading;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,13 +13,16 @@ public class PlayerScript : MonoBehaviour
     private float moveDirection;
     private bool isFacingRight;
     private bool isRunning;
-    public float moveSpeed = 500f;
+    public float moveSpeed = 650f;
 
     private bool wantsDash;
     private float dashTime;
     public float startDashTime = 0.15f;
-    public float dashSpeed = 3500;
+    public float dashSpeed = 3500f;
+    public float dashLoft = 2.5f;
     public GhostScript ghost;
+    public float dashCD = .6f;
+    private float timeUntilDash;
 
     private bool wantsJump;
     private bool canJump;
@@ -28,7 +32,7 @@ public class PlayerScript : MonoBehaviour
     public LayerMask whatIsStage;
     private int jumpsLeft;
     public int totalJumps = 1;
-    public float jumpPower = 75000f;
+    public float jumpPower = 79500f;
 
     private bool wantsFire;
     public Transform firePoint;
@@ -37,6 +41,11 @@ public class PlayerScript : MonoBehaviour
     public float fireStart = .5f;
     private bool shotFire = false;
     public float shootFireTime = .25f;
+    
+    private bool wantsMelee;
+    public Collider2D meleeHitBox;
+    private float meleeCurrentTime;
+    public float meleeAttackTime = .3f;
 
 
 
@@ -49,6 +58,7 @@ public class PlayerScript : MonoBehaviour
 
         wantsDash = false;
         dashTime = startDashTime;
+        timeUntilDash = 0;
 
         jumpsLeft = totalJumps;
         wantsJump = false;
@@ -57,6 +67,9 @@ public class PlayerScript : MonoBehaviour
 
         wantsFire = false;
         fireRelease = fireStart;
+
+        wantsMelee = false;
+        meleeCurrentTime = meleeAttackTime;
     }
 
     void Update()
@@ -81,6 +94,7 @@ public class PlayerScript : MonoBehaviour
         CheckDash();
         CheckJump();
         CheckFire();
+        CheckMelee();
     }
 
     private void CheckMovementDirection()
@@ -92,7 +106,7 @@ public class PlayerScript : MonoBehaviour
         {
             Flip();
         }
-        if (rb2d.velocity.x != 0)
+        if (rb2d.velocity.x != 0 && onStage)
         {
             isRunning = true;
         } else
@@ -103,7 +117,7 @@ public class PlayerScript : MonoBehaviour
 
     private void Flip()
     {
-        if (!wantsFire && !wantsDash)
+        if (!wantsFire && !wantsDash && !wantsMelee)
         {
             isFacingRight = !isFacingRight;
             transform.Rotate(0.0f, 180.0f, 0.0f);
@@ -112,15 +126,19 @@ public class PlayerScript : MonoBehaviour
 
     private void CheckDash()
     {
-        if (moveDirection != 0 && Input.GetKeyDown(KeyCode.RightShift) && !wantsFire && !wantsDash)
+        if (moveDirection != 0 && Input.GetKeyDown(KeyCode.RightShift) && !wantsFire && !wantsDash && !wantsMelee)
         {
-            wantsDash = true;
+            if(Time.time > timeUntilDash)
+            {
+                wantsDash = true;
+                timeUntilDash = Time.time + dashCD;
+            }
         }
     }
 
     private void CheckJump()
     {
-        if (Input.GetButtonDown("Jump") && !wantsDash && !wantsFire && jumpsLeft > 0)
+        if (Input.GetKeyDown(KeyCode.W) && !wantsDash && !wantsFire && jumpsLeft > 0 && !wantsMelee)
         {
             wantsJump = true;
         }
@@ -139,9 +157,17 @@ public class PlayerScript : MonoBehaviour
 
     private void CheckFire()
     {
-        if (Input.GetButtonDown("Fire1") && !wantsDash && !wantsJump && rb2d.velocity.y == 0.0f)
+        if (Input.GetButtonDown("Fire1") && !wantsDash && !wantsJump && rb2d.velocity.y == 0.0f && !wantsMelee)
         {
             wantsFire = true;
+        }
+    }
+
+    private void CheckMelee()
+    {
+        if (Input.GetKeyDown(KeyCode.Return) && !wantsDash && !wantsFire && rb2d.velocity.y <= 2.5f && !wantsMelee)
+        {
+            wantsMelee = true;
         }
     }
 
@@ -166,6 +192,10 @@ public class PlayerScript : MonoBehaviour
         {
             rb2d.velocity = Vector2.zero;
             Fire();
+        } else if (wantsMelee)
+        {
+            rb2d.velocity = Vector2.zero;
+            MeleeAttack();
         } else
         {
             rb2d.velocity = new Vector2(moveSpeed * moveDirection * Time.deltaTime, rb2d.velocity.y);
@@ -177,6 +207,7 @@ public class PlayerScript : MonoBehaviour
     {
         if (wantsJump && canJump)
         {
+            rb2d.velocity = new Vector2(rb2d.velocity.x, 0f);
             rb2d.AddForce(Vector2.up * jumpPower * Time.deltaTime);
             jumpsLeft--;
             wantsJump = false;
@@ -185,20 +216,17 @@ public class PlayerScript : MonoBehaviour
 
     private void Dash()
     {
-        if (wantsDash)
+        if (dashTime <= 0)
         {
-            if (dashTime <= 0)
-            {
-                dashTime = startDashTime;
-                rb2d.velocity = Vector2.zero;
-                ghost.makeGhost = false;
-                wantsDash = false;
-            } else
-            {
-                rb2d.velocity = new Vector2(moveDirection * dashSpeed * Time.deltaTime, 0.0f);
-                ghost.makeGhost = true;
-                dashTime -= Time.deltaTime;
-            }
+            dashTime = startDashTime;
+            rb2d.velocity = Vector2.zero;
+            ghost.makeGhost = false;
+            wantsDash = false;
+        } else
+        {
+            rb2d.velocity = new Vector2(moveDirection * dashSpeed * Time.deltaTime, dashLoft);
+            ghost.makeGhost = true;
+            dashTime -= Time.deltaTime;
         }
     }
 
@@ -224,8 +252,28 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
+    private void MeleeAttack()
+    {
+        Debug.Log("Do attack");
+        if (meleeCurrentTime <= 0)
+        {
+            meleeHitBox.enabled = false;
+            wantsMelee = false;
+            meleeCurrentTime = meleeAttackTime;
+        } else if (meleeCurrentTime == meleeAttackTime)
+        {
+            meleeHitBox.enabled = true;
+            anim.SetTrigger("Melee");
+            meleeCurrentTime -= Time.deltaTime;
+        } else
+        {
+            meleeCurrentTime -= Time.deltaTime;
+        }
+    }
+
     private void OnDrawGizmos()
     {
+        Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(stageCheck.position, stageCheckRadius);
     }
 
