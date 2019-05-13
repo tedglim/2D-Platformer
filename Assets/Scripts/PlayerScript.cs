@@ -9,67 +9,108 @@ public class PlayerScript : MonoBehaviour
 {
     private Rigidbody2D rb2d;
     private Animator anim;
+    private bool lockedActionOn;
 
+
+    //Move & Flip
     private float moveDirection;
     private bool isFacingRight;
     private bool isRunning;
     public float moveSpeed = 650f;
 
-    private bool wantsDash;
-    private float dashTime;
-    public float startDashTime = 0.15f;
-    public float dashSpeed = 3500f;
-    public float dashLoft = 2.5f;
-    public GhostScript ghost;
-    public float dashCD = .6f;
-    private float timeUntilDash;
-
+    //Jump
     private bool wantsJump;
     private bool canJump;
     private bool onStage;
     public Transform stageCheck;
     public float stageCheckRadius = .5f;
     public LayerMask whatIsStage;
-    private int jumpsLeft;
     public int totalJumps = 1;
+    private int jumpsLeft;
     public float jumpPower = 79500f;
+    public float actOutOfJumpSpeed = 10.0f;
 
+
+    //Dash
+    private bool wantsDash;
+    private bool canDash;
+    public float dashDuration = 0.15f;
+    private float currentDashTime;
+    public float dashSpeed = 3500f;
+    public float dashLoft = 2.5f;
+    public float dashCD = .6f;
+    private float nextDashTime;
+    public int totalAirDashes = 1;
+    private int airDashesLeft;
+    public GhostScript ghost;
+
+    //Melee Attack
+    private bool wantsMelee;
+    private bool canMeleeAttack;
+    public float meleeAttackDuration = .3f;
+    private float currentMeleeAttackTime;
+    public float meleeAttackCD = .6f;
+    private float nextMeleeAttackTime;
+    public int totalAirMeleeAttacks = 1;
+    private int airMeleeAttacksLeft;    
+    public Collider2D meleeHitBox;
+
+    //Fire Attack
     private bool wantsFire;
+    private bool canFire;
+    public float fireAttackDuration = .5f;
+    private float currentFireAttackTime;
+    public float fireAttackCD = .6f;
+    private float nextFireAttack;
+    public float shootFireDelay = .25f;
+    private bool shotFire;
+    public int totalAirFireAttacks = 1;
+    private int airFireAttacksLeft;
     public Transform firePoint;
     public GameObject firePrefab;
-    private float fireRelease;
-    public float fireStart = .5f;
-    private bool shotFire = false;
-    public float shootFireTime = .25f;
+
     
-    private bool wantsMelee;
-    public Collider2D meleeHitBox;
-    private float meleeCurrentTime;
-    public float meleeAttackTime = .3f;
-
-
 
     // Use this for initialization
     void Start()
     {
         rb2d = this.GetComponent<Rigidbody2D>();
         anim = this.GetComponent<Animator>();
+
+        //Move & Flip
         isFacingRight = true;
+        isRunning = false;
+        moveDirection = 0.0f;
 
-        wantsDash = false;
-        dashTime = startDashTime;
-        timeUntilDash = 0;
-
-        jumpsLeft = totalJumps;
+        //Jump
         wantsJump = false;
         canJump = false;
         onStage = false;
+        jumpsLeft = totalJumps;
 
-        wantsFire = false;
-        fireRelease = fireStart;
+        //Dash
+        wantsDash = false;
+        canDash = false;
+        airDashesLeft = totalAirDashes;
+        currentDashTime = dashDuration;
+        nextDashTime = 0.0f;
 
+        //Melee Attack
         wantsMelee = false;
-        meleeCurrentTime = meleeAttackTime;
+        canMeleeAttack = false;
+        airMeleeAttacksLeft = totalAirMeleeAttacks;
+        currentMeleeAttackTime = meleeAttackDuration;
+        nextMeleeAttackTime = 0.0f;
+        meleeHitBox.enabled = false;
+
+        //Fire Attack
+        wantsFire = false;
+        canFire = false;
+        shotFire = false;
+        airFireAttacksLeft = totalAirFireAttacks;
+        currentFireAttackTime = fireAttackDuration;
+        nextFireAttack = 0.0f;
+
     }
 
     void Update()
@@ -86,188 +127,232 @@ public class PlayerScript : MonoBehaviour
 
     private void CheckInputs()
     {
-        if (!wantsDash)
+        lockedActionOn = (wantsDash && canDash) || (wantsMelee && canMeleeAttack) || (wantsFire && canFire);
+        if (lockedActionOn)
         {
+            return;
+        } else {
             moveDirection = Input.GetAxisRaw("Horizontal");
+            CheckMovementDirection();
+            CheckJump();
+            CheckDash();
+            CheckMelee();
+            CheckFire();
         }
-        CheckMovementDirection();
-        CheckDash();
-        CheckJump();
-        CheckFire();
-        CheckMelee();
     }
 
     private void CheckMovementDirection()
     {
         if (isFacingRight && moveDirection < 0)
         {
+            Debug.Log("Flip Left");
             Flip();
         } else if (!isFacingRight && moveDirection > 0)
         {
+            Debug.Log("Flip Right");
             Flip();
         }
         if (rb2d.velocity.x != 0 && onStage)
         {
             isRunning = true;
-        } else
-        {
+        } else {
             isRunning = false;
         }
     }
 
     private void Flip()
     {
-        if (!wantsFire && !wantsDash && !wantsMelee)
+        isFacingRight = !isFacingRight;
+        transform.Rotate(0.0f, 180.0f, 0.0f);
+    }
+
+    private void CheckJump()
+    {
+        if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Space))
         {
-            isFacingRight = !isFacingRight;
-            transform.Rotate(0.0f, 180.0f, 0.0f);
+            Debug.Log("Requested Jump");
+            wantsJump = true;
+            if (jumpsLeft > 0 && !lockedActionOn)
+            {
+                Debug.Log("Confirmed Jump Possible");
+                canJump = true;
+            } else {
+                Debug.Log("Confirmed Jump NOT Possible");
+                canJump = false;
+            }
         }
     }
 
     private void CheckDash()
     {
-        if (moveDirection != 0 && Input.GetKeyDown(KeyCode.RightShift) && !wantsFire && !wantsDash && !wantsMelee)
+        if (moveDirection != 0 && (Input.GetKeyDown(KeyCode.RightShift) || Input.GetKeyDown(KeyCode.LeftShift)))
         {
-            if(Time.time > timeUntilDash)
+            Debug.Log("Requested Dash");
+            wantsDash = true;
+            if (Time.time > nextDashTime && airDashesLeft > 0 && rb2d.velocity.y <= actOutOfJumpSpeed && !lockedActionOn)
             {
-                wantsDash = true;
-                timeUntilDash = Time.time + dashCD;
+                Debug.Log("Confirmed Dash Possible");
+                canDash = true;
+                nextDashTime = Time.time + dashCD;
+            } else {
+                Debug.Log("Confirmed Dash NOT Possible");
+                canDash = false;
             }
-        }
-    }
-
-    private void CheckJump()
-    {
-        if (Input.GetKeyDown(KeyCode.W) && !wantsDash && !wantsFire && jumpsLeft > 0 && !wantsMelee)
-        {
-            wantsJump = true;
-        }
-        if (onStage && rb2d.velocity.y <= 0)
-        {
-            jumpsLeft = totalJumps;
-        }
-        if (jumpsLeft <= 0)
-        {
-            canJump = false;
-        } else
-        {
-            canJump = true;
-        }
-    }
-
-    private void CheckFire()
-    {
-        if (Input.GetButtonDown("Fire1") && !wantsDash && !wantsJump && rb2d.velocity.y == 0.0f && !wantsMelee)
-        {
-            wantsFire = true;
         }
     }
 
     private void CheckMelee()
     {
-        if (Input.GetKeyDown(KeyCode.Return) && !wantsDash && !wantsFire && rb2d.velocity.y <= 2.5f && !wantsMelee)
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.E))
         {
+            Debug.Log("Requested Melee Attack");
             wantsMelee = true;
+            if (Time.time > nextMeleeAttackTime && airMeleeAttacksLeft > 0 && rb2d.velocity.y <= actOutOfJumpSpeed && !lockedActionOn)
+            {
+                Debug.Log("Confirmed Melee Attack Possible");
+                canMeleeAttack = true;
+                nextMeleeAttackTime = Time.time + meleeAttackCD;
+            } else {
+                Debug.Log("Confirmed Melee Attack NOT Possible");
+                canMeleeAttack = false;
+            }
+        }
+    }
+
+    private void CheckFire()
+    {
+        if (Input.GetKeyDown(KeyCode.Backslash) || Input.GetKeyDown(KeyCode.Q))
+        {
+            Debug.Log("Requested Fire Attack");
+            wantsFire = true;
+            if (Time.time > nextFireAttack && airFireAttacksLeft > 0 && rb2d.velocity.y <= actOutOfJumpSpeed && !lockedActionOn)
+            {
+                Debug.Log("Confirmed Fire Attack Possible");
+                canFire = true;
+                nextFireAttack = Time.time + fireAttackCD;
+            } else {
+                Debug.Log("Confiremd Fire Attack NOT Possible");
+                canFire = false;
+            }
         }
     }
 
     void UpdateAnimations()
     {
         anim.SetBool("isRunning", isRunning);
-        anim.SetBool("isGrounded", onStage);
+        anim.SetBool("onStage", onStage);
         anim.SetFloat("yVel", rb2d.velocity.y);
     }
 
     private void CheckSurroundings()
     {
         onStage = Physics2D.OverlapCircle(stageCheck.position, stageCheckRadius, whatIsStage);
+        if (onStage) {
+            // Debug.Log("1 Available Air Dash");
+            airDashesLeft = totalAirDashes;
+            // Debug.Log("1 Available Jump");
+            jumpsLeft = totalJumps;
+            // Debug.Log("1 Available Air Melee Attack");
+            airMeleeAttacksLeft = totalAirMeleeAttacks;
+            // Debug.Log("1 Available Air Fire Attack");
+            airFireAttacksLeft = totalAirFireAttacks;
+        }
     }
 
     private void doMovement()
     {
-        if (wantsDash)
+        if (wantsDash && canDash)
         {
             Dash();
-        } else if (wantsFire)
+        } else if (wantsMelee && canMeleeAttack)
         {
-            rb2d.velocity = Vector2.zero;
-            Fire();
-        } else if (wantsMelee)
-        {
-            rb2d.velocity = Vector2.zero;
             MeleeAttack();
-        } else
+        } else if (wantsFire && canFire)
         {
+            Fire();
+        } else {
+            if (wantsJump && canJump)
+            {
+                Jump();
+            }
             rb2d.velocity = new Vector2(moveSpeed * moveDirection * Time.deltaTime, rb2d.velocity.y);
-            Jump();
         }
     }
 
     private void Jump()
     {
-        if (wantsJump && canJump)
-        {
-            rb2d.velocity = new Vector2(rb2d.velocity.x, 0f);
-            rb2d.AddForce(Vector2.up * jumpPower * Time.deltaTime);
-            jumpsLeft--;
-            wantsJump = false;
-        }
+        Debug.Log("Performed Jump");
+        rb2d.velocity = new Vector2(rb2d.velocity.x, 0f);
+        rb2d.AddForce(Vector2.up * jumpPower * Time.deltaTime);
+        jumpsLeft--;
+        wantsJump = false;
+        Debug.Log("Turned Off Jump Request");
     }
 
     private void Dash()
     {
-        if (dashTime <= 0)
+        if (currentDashTime <= 0)
         {
-            dashTime = startDashTime;
             rb2d.velocity = Vector2.zero;
             ghost.makeGhost = false;
             wantsDash = false;
-        } else
-        {
+            airDashesLeft--;
+            currentDashTime = dashDuration;
+            Debug.Log("Turned Off Dash Request");
+        } else {
+
             rb2d.velocity = new Vector2(moveDirection * dashSpeed * Time.deltaTime, dashLoft);
             ghost.makeGhost = true;
-            dashTime -= Time.deltaTime;
-        }
-    }
-
-    private void Fire()
-    {
-        if (fireRelease == fireStart)
-        {
-            shotFire = false;
-            anim.SetTrigger("Fire");
-            fireRelease -= Time.deltaTime;
-        } else if (fireRelease < fireStart && fireRelease > 0)
-        {
-            fireRelease -= Time.deltaTime;
-            if (fireRelease <= shootFireTime && shotFire == false)
-            {
-                Instantiate(firePrefab, firePoint.position, firePoint.rotation);
-                shotFire = true;
-            }
-        } else if (fireRelease <= 0)
-        {
-            wantsFire = false;
-            fireRelease = fireStart;
+            currentDashTime -= Time.deltaTime;
         }
     }
 
     private void MeleeAttack()
     {
-        Debug.Log("Do attack");
-        if (meleeCurrentTime <= 0)
+        if (currentMeleeAttackTime <= 0)
         {
             meleeHitBox.enabled = false;
             wantsMelee = false;
-            meleeCurrentTime = meleeAttackTime;
-        } else if (meleeCurrentTime == meleeAttackTime)
+            airMeleeAttacksLeft--;
+            currentMeleeAttackTime = meleeAttackDuration;
+            Debug.Log("Turned off Melee Request");
+        } else if (currentMeleeAttackTime == meleeAttackDuration)
         {
+            Debug.Log("Performed Melee Attack");
+            rb2d.velocity = Vector2.zero;
             meleeHitBox.enabled = true;
             anim.SetTrigger("Melee");
-            meleeCurrentTime -= Time.deltaTime;
-        } else
+            currentMeleeAttackTime -= Time.deltaTime;
+        } else {
+            rb2d.velocity = Vector2.zero;
+            currentMeleeAttackTime -= Time.deltaTime;
+        }
+    }
+
+    private void Fire()
+    {
+        if (currentFireAttackTime <= 0)
         {
-            meleeCurrentTime -= Time.deltaTime;
+            wantsFire = false;
+            airFireAttacksLeft--;
+            currentFireAttackTime = fireAttackDuration;
+            Debug.Log("Turned off Fire Request");
+
+        } else if (currentFireAttackTime == fireAttackDuration)
+        {
+            Debug.Log("Performed Fire Attack");
+            rb2d.velocity = Vector2.zero;
+            shotFire = false;
+            anim.SetTrigger("Fire");
+            currentFireAttackTime -= Time.deltaTime;
+        } else {
+            rb2d.velocity = Vector2.zero;
+            currentFireAttackTime -= Time.deltaTime;
+            if (currentFireAttackTime <= shootFireDelay && shotFire == false)
+            {
+                Instantiate(firePrefab, firePoint.position, firePoint.rotation);
+                shotFire = true;
+            }
         }
     }
 
