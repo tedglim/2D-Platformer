@@ -28,15 +28,15 @@ public class PlayerScript : MonoBehaviour
     public int totalJumps = 1;
     private int jumpsLeft;
     public float jumpPower = 79500f;
-    public float actOutOfJumpSpeed = 10.0f;
+    public float actOutOfJumpSpeed = 25.0f;
 
 
     //Dash
     private bool wantsDash;
     private bool canDash;
-    public float dashDuration = 0.15f;
+    public float dashDuration = 0.1f;
     private float currentDashTime;
-    public float dashSpeed = 3500f;
+    public float dashSpeed = 5000f;
     public float dashLoft = 2.5f;
     public float dashCD = .6f;
     private float nextDashTime;
@@ -47,13 +47,13 @@ public class PlayerScript : MonoBehaviour
     //Melee Attack
     private bool wantsMelee;
     private bool canMeleeAttack;
-    public float meleeAttackDuration = .3f;
+    public float meleeAttackDuration = .38f;
     private float currentMeleeAttackTime;
     public float meleeAttackCD = .6f;
     private float nextMeleeAttackTime;
     public int totalAirMeleeAttacks = 1;
     private int airMeleeAttacksLeft;    
-    public Collider2D meleeHitBox;
+    public GameObject meleeHitBox;
 
     //Fire Attack
     private bool wantsFire;
@@ -69,7 +69,12 @@ public class PlayerScript : MonoBehaviour
     public Transform firePoint;
     public GameObject firePrefab;
 
-    
+    private Collider2D[] enemiesToDamage;
+    public float attackRangeX = 2.4f;
+    public float attackRangeY = 2.5f;
+    public LayerMask whatAreEnemies;
+    public int damage = 20;
+
 
     // Use this for initialization
     void Start()
@@ -101,7 +106,6 @@ public class PlayerScript : MonoBehaviour
         airMeleeAttacksLeft = totalAirMeleeAttacks;
         currentMeleeAttackTime = meleeAttackDuration;
         nextMeleeAttackTime = 0.0f;
-        meleeHitBox.enabled = false;
 
         //Fire Attack
         wantsFire = false;
@@ -257,6 +261,7 @@ public class PlayerScript : MonoBehaviour
             // Debug.Log("1 Available Air Fire Attack");
             airFireAttacksLeft = totalAirFireAttacks;
         }
+        enemiesToDamage = Physics2D.OverlapBoxAll(meleeHitBox.transform.position, new Vector2(attackRangeX, attackRangeY), 0, whatAreEnemies);
     }
 
     private void doMovement()
@@ -311,7 +316,6 @@ public class PlayerScript : MonoBehaviour
     {
         if (currentMeleeAttackTime <= 0)
         {
-            meleeHitBox.enabled = false;
             wantsMelee = false;
             airMeleeAttacksLeft--;
             currentMeleeAttackTime = meleeAttackDuration;
@@ -320,7 +324,10 @@ public class PlayerScript : MonoBehaviour
         {
             Debug.Log("Performed Melee Attack");
             rb2d.velocity = Vector2.zero;
-            meleeHitBox.enabled = true;
+            for (int i = 0; i< enemiesToDamage.Length; i++)
+            {
+                enemiesToDamage[i].GetComponent<EnemyMaceScript>().TakeDamage(damage);
+            }
             anim.SetTrigger("Melee");
             currentMeleeAttackTime -= Time.deltaTime;
         } else {
@@ -360,6 +367,7 @@ public class PlayerScript : MonoBehaviour
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(stageCheck.position, stageCheckRadius);
+        Gizmos.DrawWireCube(meleeHitBox.transform.position, new Vector3(attackRangeX, attackRangeY, 1));
     }
 
 }

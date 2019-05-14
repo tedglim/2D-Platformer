@@ -55,6 +55,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Scripts\CameraScript.cs" />
      <Compile Include="Assets\Scripts\EnemyMaceScript.cs" />
      <Compile Include="Assets\Scripts\FireScript.cs" />
      <Compile Include="Assets\Scripts\GhostScript.cs" />

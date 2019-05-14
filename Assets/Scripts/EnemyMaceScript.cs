@@ -31,6 +31,7 @@ public class EnemyMaceScript : MonoBehaviour
     private float InvulnerableColorRotation = .5f; 
 
     public float InvulnerableInterval = .1f;
+    private CameraScript cam;
 
     // Start is called before the first frame update
     void Start()
@@ -44,6 +45,7 @@ public class EnemyMaceScript : MonoBehaviour
         elapsedInvulnerablTime = InvulnerableDuration;
         eyeR.SetActive(false);
         eyeL.SetActive(false);
+        cam = GameObject.FindGameObjectWithTag("Camera").GetComponent<CameraScript>();
     }
 
     // Update is called once per frame
@@ -82,6 +84,7 @@ public class EnemyMaceScript : MonoBehaviour
     public void TakeDamage(int damage)
     {
         health -= damage;
+        cam.camShake();
         StartCoroutine(DamageFlashing());
         // while (elapsedInvulnerablTime > 0)
         // {
@@ -144,5 +147,11 @@ public class EnemyMaceScript : MonoBehaviour
             Debug.Log("Hit Player");
             rb2d.velocity = Vector2.zero;
         }
+        // if (hitInfo.gameObject.tag == "PlayerMelee")
+        // {
+        //     Debug.Log("Hit PlayerMelee");
+        //     TakeDamage(damage);
+        //     // rb2d.velocity = Vector2.zero;
+        // }
     }
 }
