@@ -32,6 +32,10 @@ public class EnemyMaceScript : MonoBehaviour
 
     public float InvulnerableInterval = .1f;
     private CameraScript cam;
+    public float sawAttackCD = 1f;
+    private float currentSawAttack;
+    public Transform sawAttackPos1;
+    public GameObject sawPrefab;
 
     // Start is called before the first frame update
     void Start()
@@ -46,6 +50,7 @@ public class EnemyMaceScript : MonoBehaviour
         eyeR.SetActive(false);
         eyeL.SetActive(false);
         cam = GameObject.FindGameObjectWithTag("Camera").GetComponent<CameraScript>();
+        currentSawAttack = 0.0f;
     }
 
     // Update is called once per frame
@@ -71,6 +76,11 @@ public class EnemyMaceScript : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (Time.time > currentSawAttack)
+        {
+            Instantiate(sawPrefab, sawAttackPos1.transform.position, Quaternion.identity);
+            currentSawAttack = Time.time + sawAttackCD;
+        }
         // if(!playerFound)
         // {
         //     transform.position = Vector2.MoveTowards(transform.position, new Vector2 (target.position.x, transform.position.y), speed * Time.deltaTime);

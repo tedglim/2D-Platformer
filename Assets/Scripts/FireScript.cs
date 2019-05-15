@@ -15,7 +15,7 @@ public class FireScript : MonoBehaviour
 
     void Awake()
     {
-        Rigidbody2D rb2d = GetComponent<Rigidbody2D>();
+        rb2d = GetComponent<Rigidbody2D>();
         rb2d.velocity = transform.right * fireSpeed;
         fireStartPos = transform.position.x;
         currentFireHealth = fireHealth;

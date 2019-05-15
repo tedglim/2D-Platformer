@@ -5,10 +5,13 @@ using UnityEngine;
 public class SawProjectileScript : MonoBehaviour
 {
     public GameObject sawDeathEffect;
+    private Rigidbody2D rb2d;
+    public float spikeSpeed = 20f;
     // Start is called before the first frame update
     void Awake()
     {
-        
+        rb2d = GetComponent<Rigidbody2D>();
+        rb2d.velocity = Vector2.left * spikeSpeed;
     }
 
     // Update is called once per frame

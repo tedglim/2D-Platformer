@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Sprites;
+using UnityEngine.UI;
 
 public class PlayerScript : MonoBehaviour
 {
@@ -55,6 +56,11 @@ public class PlayerScript : MonoBehaviour
     public int totalAirMeleeAttacks = 1;
     private int airMeleeAttacksLeft;    
     public GameObject meleeHitBox;
+    private Collider2D[] enemiesToDamage;
+    public float attackRangeX = 2.4f;
+    public float attackRangeY = 2.5f;
+    public LayerMask whatAreEnemies;
+
 
     //Fire Attack
     private bool wantsFire;
@@ -70,14 +76,11 @@ public class PlayerScript : MonoBehaviour
     public Transform firePoint;
     public GameObject firePrefab;
 
-    private Collider2D[] enemiesToDamage;
-    public float attackRangeX = 2.4f;
-    public float attackRangeY = 2.5f;
-    public LayerMask whatAreEnemies;
-    public int damage = 20;
-    public int playerHealth = 20;
-    private int currentHealth;
 
+    public int damage = 20;
+    public float playerHealth = 20.0f;
+    private float currentHealth;
+    public Image hpBar;
 
     // Use this for initialization
     void Start()
@@ -324,9 +327,13 @@ public class PlayerScript : MonoBehaviour
             airMeleeAttacksLeft--;
             currentMeleeAttackTime = meleeAttackDuration;
             Debug.Log("Turned off Melee Request");
-        } else if (currentMeleeAttackTime == meleeAttackDuration)
+        } else if (currentMeleeAttackTime <= meleeAttackDuration)
         {
-            Debug.Log("Performed Melee Attack");
+            if (currentMeleeAttackTime == meleeAttackDuration)
+            {
+                anim.SetTrigger("Melee");
+                Debug.Log("Performed Melee Attack");
+            }
             rb2d.velocity = Vector2.zero;
             for (int i = 0; i< enemiesToDamage.Length; i++)
             {
@@ -340,12 +347,8 @@ public class PlayerScript : MonoBehaviour
                     enemiesToDamage[i].GetComponent<SawProjectileScript>().GetDestroyed();
                 }
             }
-            anim.SetTrigger("Melee");
             currentMeleeAttackTime -= Time.deltaTime;
-        } else {
-            rb2d.velocity = Vector2.zero;
-            currentMeleeAttackTime -= Time.deltaTime;
-        }
+        } 
     }
 
     private void Fire()
@@ -377,7 +380,9 @@ public class PlayerScript : MonoBehaviour
 
     public void takeDamage()
     {
-        currentHealth -= 10;
+        currentHealth -= 1.0f;
+        hpBar.fillAmount = currentHealth/playerHealth;
+
         Debug.Log("Took damage from enemy");
     }
     private void OnDrawGizmos()

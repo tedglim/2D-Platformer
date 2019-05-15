@@ -133,3 +133,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sawDeathEffect: {fileID: 6966666114446085052, guid: 39ad6094da0ba493ba03a317970dfdc4,
     type: 3}
+  spikeSpeed: 10
