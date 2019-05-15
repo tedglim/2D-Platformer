@@ -9,6 +9,9 @@ TagManager:
   - PlayerMelee
   - Camera
   - Bounds
+  - Indestructible
+  - PlayerDestructibles
+  - EnemyDestructibles
   layers:
   - Default
   - TransparentFX
@@ -19,8 +22,8 @@ TagManager:
   - 
   - 
   - Stage
-  - Player
   - Enemy
+  - Player
   - 
   - 
   - 
