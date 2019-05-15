@@ -135,23 +135,12 @@ public class EnemyMaceScript : MonoBehaviour
         Destroy(effect, 3f);
     }
 
-    private void OnTriggerEnter2D(Collider2D hitInfo)
+    void OnTriggerEnter2D(Collider2D hitInfo)
     {
-        // if (hitInfo.gameObject.tag == "Stage")
-        // {
-        //     Debug.Log("Hit Stage");
-        //     rb2d.velocity = Vector2.zero;
-        // }
-        // if (hitInfo.gameObject.tag == "Player")
-        // {
-        //     Debug.Log("Hit Player");
-        //     rb2d.velocity = Vector2.zero;
-        // }
-        // if (hitInfo.gameObject.tag == "PlayerMelee")
-        // {
-        //     Debug.Log("Hit PlayerMelee");
-        //     TakeDamage(damage);
-        //     // rb2d.velocity = Vector2.zero;
-        // }
+        if(hitInfo.gameObject.tag == "Player")
+        {
+            PlayerScript player = hitInfo.GetComponent<PlayerScript>();
+            player.takeDamage();
+        }
     }
 }

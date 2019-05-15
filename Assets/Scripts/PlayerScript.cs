@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Runtime.InteropServices.ComTypes;
+using System.Threading;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -74,6 +75,8 @@ public class PlayerScript : MonoBehaviour
     public float attackRangeY = 2.5f;
     public LayerMask whatAreEnemies;
     public int damage = 20;
+    public int playerHealth = 20;
+    private int currentHealth;
 
 
     // Use this for initialization
@@ -115,6 +118,7 @@ public class PlayerScript : MonoBehaviour
         currentFireAttackTime = fireAttackDuration;
         nextFireAttack = 0.0f;
 
+        currentHealth = playerHealth;
     }
 
     void Update()
@@ -371,6 +375,11 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
+    public void takeDamage()
+    {
+        currentHealth -= 10;
+        Debug.Log("Took damage from enemy");
+    }
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;

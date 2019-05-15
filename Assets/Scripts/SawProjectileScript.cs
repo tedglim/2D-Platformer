@@ -17,13 +17,20 @@ public class SawProjectileScript : MonoBehaviour
         
     }
 
-    void onTriggerEnter2D (Collider2D hitInfo)
+    void OnTriggerEnter2D (Collider2D hitInfo)
     {
+        Debug.Log("Had collision with saw");
         if (hitInfo.gameObject.tag == "Stage" || hitInfo.gameObject.tag == "Bounds")
         {
             Destroy(gameObject);
 
+        } else if(hitInfo.gameObject.tag == "Player")
+        {
+            Debug.Log("Hit Player");
+            PlayerScript player = hitInfo.GetComponent<PlayerScript>();
+            player.takeDamage();
         }
+
     }
 
     // void onCollisionEnter2D(Collision2D collision)
