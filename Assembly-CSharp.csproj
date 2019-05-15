@@ -60,6 +60,7 @@
      <Compile Include="Assets\Scripts\FireScript.cs" />
      <Compile Include="Assets\Scripts\GhostScript.cs" />
      <Compile Include="Assets\Scripts\PlayerScript.cs" />
+     <Compile Include="Assets\Scripts\SawProjectileScript.cs" />
      <None Include="Assets\Ninja Files\Read Me.txt" />
      <None Include="Assets\BayatGames\Free Platform Game Assets\Readme.txt" />
  <Reference Include="Unity.Timeline.Editor">

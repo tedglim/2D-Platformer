@@ -137,16 +137,16 @@ public class EnemyMaceScript : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D hitInfo)
     {
-        if (hitInfo.gameObject.tag == "Stage")
-        {
-            Debug.Log("Hit Stage");
-            rb2d.velocity = Vector2.zero;
-        }
-        if (hitInfo.gameObject.tag == "Player")
-        {
-            Debug.Log("Hit Player");
-            rb2d.velocity = Vector2.zero;
-        }
+        // if (hitInfo.gameObject.tag == "Stage")
+        // {
+        //     Debug.Log("Hit Stage");
+        //     rb2d.velocity = Vector2.zero;
+        // }
+        // if (hitInfo.gameObject.tag == "Player")
+        // {
+        //     Debug.Log("Hit Player");
+        //     rb2d.velocity = Vector2.zero;
+        // }
         // if (hitInfo.gameObject.tag == "PlayerMelee")
         // {
         //     Debug.Log("Hit PlayerMelee");

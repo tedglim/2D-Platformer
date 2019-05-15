@@ -326,7 +326,15 @@ public class PlayerScript : MonoBehaviour
             rb2d.velocity = Vector2.zero;
             for (int i = 0; i< enemiesToDamage.Length; i++)
             {
-                enemiesToDamage[i].GetComponent<EnemyMaceScript>().TakeDamage(damage);
+                Debug.Log("Detected object");
+                if (enemiesToDamage[i].gameObject.tag == "Enemy")
+                {
+                    enemiesToDamage[i].GetComponent<EnemyMaceScript>().TakeDamage(damage);
+                } else if (enemiesToDamage[i].gameObject.tag == "EnemyDestructibles")
+                {
+                    Debug.Log("Hit Spike with Sword");
+                    enemiesToDamage[i].GetComponent<SawProjectileScript>().GetDestroyed();
+                }
             }
             anim.SetTrigger("Melee");
             currentMeleeAttackTime -= Time.deltaTime;
