@@ -36,6 +36,9 @@ public class EnemyMaceScript : MonoBehaviour
     private float currentSawAttack;
     public Transform sawAttackPos1;
     public GameObject sawPrefab;
+    public GameObject sawPrefabIndestructible;
+    public GameObject[] spikePrefabs;
+    public PlayerScript playerScript;
 
     // Start is called before the first frame update
     void Start()
@@ -93,29 +96,15 @@ public class EnemyMaceScript : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        if(!playerScript.hitOnce)
+        {
         health -= damage;
         cam.camShake();
         StartCoroutine(DamageFlashing());
-        // while (elapsedInvulnerablTime > 0)
-        // {
-        //     if(sr2d.color == Color.red && Time.time > InvulnerableInterval){
-        //         Debug.Log("Make Me White");
-
-        //         sr2d.material.color = Color.white;
-        //         colorChangeTime = Time.time + InvulnerableInterval;
-        //     } else if (sr2d.color == Color.white && Time.time > InvulnerableInterval)
-        //     {
-        //         Debug.Log("Make Me Red");
-        //         sr2d.material.color = Color.red;  
-        //         colorChangeTime = Time.time + InvulnerableInterval;
-        //     }
-        //     elapsedInvulnerablTime -= Time.deltaTime;
-        // }
-        // Debug.Log("End White");
-        // sr2d.material.color = Color.white;
-        // StartCoroutine(DamageFlashing());
-        // sr2d.color = Color.red;
         hpBar.fillAmount = health / totalHealth;
+        playerScript.hitOnce = true;
+
+        }
         if (health <= 0)
         {
             Die();
@@ -146,6 +135,15 @@ public class EnemyMaceScript : MonoBehaviour
     }
 
     void OnTriggerEnter2D(Collider2D hitInfo)
+    {
+        if(hitInfo.gameObject.tag == "Player")
+        {
+            PlayerScript player = hitInfo.GetComponent<PlayerScript>();
+            player.takeDamage();
+        }
+    }
+
+    void OnTriggerStay2D(Collider2D hitInfo)
     {
         if(hitInfo.gameObject.tag == "Player")
         {

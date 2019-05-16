@@ -49,17 +49,19 @@ public class PlayerScript : MonoBehaviour
     //Melee Attack
     private bool wantsMelee;
     private bool canMeleeAttack;
-    public float meleeAttackDuration = .38f;
+    public float meleeAttackDuration = .26f;
     private float currentMeleeAttackTime;
-    public float meleeAttackCD = .6f;
+    public float meleeAttackCD = .3f;
     private float nextMeleeAttackTime;
     public int totalAirMeleeAttacks = 1;
-    private int airMeleeAttacksLeft;    
+    private int airMeleeAttacksLeft;
     public GameObject meleeHitBox;
     private Collider2D[] enemiesToDamage;
     public float attackRangeX = 2.4f;
     public float attackRangeY = 2.5f;
     public LayerMask whatAreEnemies;
+    public bool hitOnce;
+
 
 
     //Fire Attack
@@ -81,6 +83,10 @@ public class PlayerScript : MonoBehaviour
     public float playerHealth = 20.0f;
     private float currentHealth;
     public Image hpBar;
+    private float invincibleDuration;
+    public float invincibleCD = 1f;
+    private SpriteRenderer sr2d;
+    private bool isHurt;
 
     // Use this for initialization
     void Start()
@@ -112,6 +118,7 @@ public class PlayerScript : MonoBehaviour
         airMeleeAttacksLeft = totalAirMeleeAttacks;
         currentMeleeAttackTime = meleeAttackDuration;
         nextMeleeAttackTime = 0.0f;
+        hitOnce = false;
 
         //Fire Attack
         wantsFire = false;
@@ -122,6 +129,8 @@ public class PlayerScript : MonoBehaviour
         nextFireAttack = 0.0f;
 
         currentHealth = playerHealth;
+        sr2d = GetComponent<SpriteRenderer>();
+        isHurt = false;
     }
 
     void Update()
@@ -142,7 +151,9 @@ public class PlayerScript : MonoBehaviour
         if (lockedActionOn)
         {
             return;
-        } else {
+        }
+        else
+        {
             moveDirection = Input.GetAxisRaw("Horizontal");
             CheckMovementDirection();
             CheckJump();
@@ -158,7 +169,8 @@ public class PlayerScript : MonoBehaviour
         {
             Debug.Log("Flip Left");
             Flip();
-        } else if (!isFacingRight && moveDirection > 0)
+        }
+        else if (!isFacingRight && moveDirection > 0)
         {
             Debug.Log("Flip Right");
             Flip();
@@ -166,7 +178,9 @@ public class PlayerScript : MonoBehaviour
         if (rb2d.velocity.x != 0 && onStage)
         {
             isRunning = true;
-        } else {
+        }
+        else
+        {
             isRunning = false;
         }
     }
@@ -179,7 +193,7 @@ public class PlayerScript : MonoBehaviour
 
     private void CheckJump()
     {
-        if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Space))
+        if ((Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Space)))
         {
             Debug.Log("Requested Jump");
             wantsJump = true;
@@ -187,7 +201,9 @@ public class PlayerScript : MonoBehaviour
             {
                 Debug.Log("Confirmed Jump Possible");
                 canJump = true;
-            } else {
+            }
+            else
+            {
                 Debug.Log("Confirmed Jump NOT Possible");
                 canJump = false;
             }
@@ -196,7 +212,9 @@ public class PlayerScript : MonoBehaviour
 
     private void CheckDash()
     {
-        if (moveDirection != 0 && (Input.GetKeyDown(KeyCode.RightShift) || Input.GetKeyDown(KeyCode.LeftShift)))
+        if (!isHurt && moveDirection != 0 && (Input.GetKeyDown(KeyCode.RightShift) || Input.GetKeyDown(KeyCode.LeftShift)))
+        // if ((Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow)) && (Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift)))
+
         {
             Debug.Log("Requested Dash");
             wantsDash = true;
@@ -205,7 +223,9 @@ public class PlayerScript : MonoBehaviour
                 Debug.Log("Confirmed Dash Possible");
                 canDash = true;
                 nextDashTime = Time.time + dashCD;
-            } else {
+            }
+            else
+            {
                 Debug.Log("Confirmed Dash NOT Possible");
                 canDash = false;
             }
@@ -214,7 +234,7 @@ public class PlayerScript : MonoBehaviour
 
     private void CheckMelee()
     {
-        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.E))
+        if ((Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.E)) && !isHurt)
         {
             Debug.Log("Requested Melee Attack");
             wantsMelee = true;
@@ -223,7 +243,9 @@ public class PlayerScript : MonoBehaviour
                 Debug.Log("Confirmed Melee Attack Possible");
                 canMeleeAttack = true;
                 nextMeleeAttackTime = Time.time + meleeAttackCD;
-            } else {
+            }
+            else
+            {
                 Debug.Log("Confirmed Melee Attack NOT Possible");
                 canMeleeAttack = false;
             }
@@ -232,7 +254,7 @@ public class PlayerScript : MonoBehaviour
 
     private void CheckFire()
     {
-        if (Input.GetKeyDown(KeyCode.Backslash) || Input.GetKeyDown(KeyCode.Q))
+        if ((Input.GetKeyDown(KeyCode.Backslash) || Input.GetKeyDown(KeyCode.Q)) && !isHurt)
         {
             Debug.Log("Requested Fire Attack");
             wantsFire = true;
@@ -241,7 +263,9 @@ public class PlayerScript : MonoBehaviour
                 Debug.Log("Confirmed Fire Attack Possible");
                 canFire = true;
                 nextFireAttack = Time.time + fireAttackCD;
-            } else {
+            }
+            else
+            {
                 Debug.Log("Confiremd Fire Attack NOT Possible");
                 canFire = false;
             }
@@ -258,7 +282,8 @@ public class PlayerScript : MonoBehaviour
     private void CheckSurroundings()
     {
         onStage = Physics2D.OverlapCircle(stageCheck.position, stageCheckRadius, whatIsStage);
-        if (onStage) {
+        if (onStage)
+        {
             // Debug.Log("1 Available Air Dash");
             airDashesLeft = totalAirDashes;
             // Debug.Log("1 Available Jump");
@@ -276,18 +301,26 @@ public class PlayerScript : MonoBehaviour
         if (wantsDash && canDash)
         {
             Dash();
-        } else if (wantsMelee && canMeleeAttack)
+        }
+        else if (wantsMelee && canMeleeAttack)
         {
             MeleeAttack();
-        } else if (wantsFire && canFire)
+        }
+        else if (wantsFire && canFire)
         {
             Fire();
-        } else {
+        }
+        else
+        {
             if (wantsJump && canJump)
             {
                 Jump();
             }
-            rb2d.velocity = new Vector2(moveSpeed * moveDirection * Time.deltaTime, rb2d.velocity.y);
+            if(!isHurt)
+            {
+                rb2d.velocity = new Vector2(moveSpeed * moveDirection * Time.deltaTime, rb2d.velocity.y);
+
+            }
         }
     }
 
@@ -311,7 +344,9 @@ public class PlayerScript : MonoBehaviour
             airDashesLeft--;
             currentDashTime = dashDuration;
             Debug.Log("Turned Off Dash Request");
-        } else {
+        }
+        else
+        {
 
             rb2d.velocity = new Vector2(moveDirection * dashSpeed * Time.deltaTime, dashLoft);
             ghost.makeGhost = true;
@@ -323,11 +358,13 @@ public class PlayerScript : MonoBehaviour
     {
         if (currentMeleeAttackTime <= 0)
         {
+            hitOnce = false;
             wantsMelee = false;
             airMeleeAttacksLeft--;
             currentMeleeAttackTime = meleeAttackDuration;
             Debug.Log("Turned off Melee Request");
-        } else if (currentMeleeAttackTime <= meleeAttackDuration)
+        }
+        else if (currentMeleeAttackTime <= meleeAttackDuration)
         {
             if (currentMeleeAttackTime == meleeAttackDuration)
             {
@@ -335,20 +372,24 @@ public class PlayerScript : MonoBehaviour
                 Debug.Log("Performed Melee Attack");
             }
             rb2d.velocity = Vector2.zero;
-            for (int i = 0; i< enemiesToDamage.Length; i++)
+            for (int i = 0; i < enemiesToDamage.Length; i++)
             {
                 Debug.Log("Detected object");
                 if (enemiesToDamage[i].gameObject.tag == "Enemy")
                 {
-                    enemiesToDamage[i].GetComponent<EnemyMaceScript>().TakeDamage(damage);
-                } else if (enemiesToDamage[i].gameObject.tag == "EnemyDestructibles")
+                    if(!hitOnce)
+                    {
+                        enemiesToDamage[i].GetComponent<EnemyMaceScript>().TakeDamage(damage);
+                    }
+                }
+                else if (enemiesToDamage[i].gameObject.tag == "EnemyDestructibles")
                 {
                     Debug.Log("Hit Spike with Sword");
                     enemiesToDamage[i].GetComponent<SawProjectileScript>().GetDestroyed();
                 }
             }
             currentMeleeAttackTime -= Time.deltaTime;
-        } 
+        }
     }
 
     private void Fire()
@@ -360,14 +401,17 @@ public class PlayerScript : MonoBehaviour
             currentFireAttackTime = fireAttackDuration;
             Debug.Log("Turned off Fire Request");
 
-        } else if (currentFireAttackTime == fireAttackDuration)
+        }
+        else if (currentFireAttackTime == fireAttackDuration)
         {
             Debug.Log("Performed Fire Attack");
             rb2d.velocity = Vector2.zero;
             shotFire = false;
             anim.SetTrigger("Fire");
             currentFireAttackTime -= Time.deltaTime;
-        } else {
+        }
+        else
+        {
             rb2d.velocity = Vector2.zero;
             currentFireAttackTime -= Time.deltaTime;
             if (currentFireAttackTime <= shootFireDelay && shotFire == false)
@@ -380,11 +424,33 @@ public class PlayerScript : MonoBehaviour
 
     public void takeDamage()
     {
-        currentHealth -= 1.0f;
-        hpBar.fillAmount = currentHealth/playerHealth;
-
-        Debug.Log("Took damage from enemy");
+        if (Time.time > invincibleDuration)
+        {
+            anim.SetTrigger("Hurt");
+            currentHealth -= 1.0f;
+            rb2d.AddForce(Vector2.up * 2000f * Time.deltaTime, ForceMode2D.Impulse);
+            rb2d.AddForce(Vector2.left * 1000f * Time.deltaTime, ForceMode2D.Impulse);
+            hpBar.fillAmount = currentHealth / playerHealth;
+            StartCoroutine(DamageFlashing());
+            invincibleDuration = Time.time + invincibleCD;
+            Debug.Log("Took damage from enemy");
+        }
     }
+
+    private IEnumerator DamageFlashing()
+    {
+        isHurt = true;
+        for (int i = 0; i < 2; i++)
+        {
+            sr2d.material.color = Color.red;
+            yield return new WaitForSeconds(.25f/2);
+
+            sr2d.material.color = Color.white;
+            yield return new WaitForSeconds(.25f/2);
+        }
+        isHurt = false;
+    }
+
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
