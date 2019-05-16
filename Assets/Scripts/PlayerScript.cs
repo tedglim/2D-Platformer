@@ -39,8 +39,8 @@ public class PlayerScript : MonoBehaviour
     public float dashDuration = 0.1f;
     private float currentDashTime;
     public float dashSpeed = 5000f;
-    public float dashLoft = 2.5f;
-    public float dashCD = .6f;
+    public float dashLoft = 7.0f;
+    public float dashCD = .25f;
     private float nextDashTime;
     public int totalAirDashes = 1;
     private int airDashesLeft;
@@ -51,7 +51,7 @@ public class PlayerScript : MonoBehaviour
     private bool canMeleeAttack;
     public float meleeAttackDuration = .26f;
     private float currentMeleeAttackTime;
-    public float meleeAttackCD = .3f;
+    public float meleeAttackCD = .28f;
     private float nextMeleeAttackTime;
     public int totalAirMeleeAttacks = 1;
     private int airMeleeAttacksLeft;
@@ -61,8 +61,6 @@ public class PlayerScript : MonoBehaviour
     public float attackRangeY = 2.5f;
     public LayerMask whatAreEnemies;
     public bool hitOnce;
-
-
 
     //Fire Attack
     private bool wantsFire;

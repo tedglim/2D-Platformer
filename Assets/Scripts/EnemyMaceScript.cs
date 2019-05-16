@@ -24,7 +24,7 @@ public class EnemyMaceScript : MonoBehaviour
     private SpriteRenderer sr2d;
     private float elapsedInvulnerablTime;
     public GameObject maceDeathEffect;
-    public float InvulnerableDuration = 2.0f;
+    public float InvulnerableDuration = 1.0f;
     private float colorChangeTime;
     public GameObject eyeR;
     public GameObject eyeL;
@@ -79,9 +79,25 @@ public class EnemyMaceScript : MonoBehaviour
 
     void FixedUpdate()
     {
+        
         if (Time.time > currentSawAttack)
         {
-            Instantiate(sawPrefab, sawAttackPos1.transform.position, Quaternion.identity);
+            if (UnityEngine.Random.Range(0, 2) == 0)
+            {
+                for (int i=0; i < 5; i++)
+                {
+                GameObject obj = Instantiate(spikePrefabs[0], sawAttackPos1.position, Quaternion.identity);
+                obj.GetComponent<Rigidbody2D>().velocity = new Vector2(-5f, UnityEngine.Random.Range(-7f, 7f));
+                // GameObject object = Instantiate(spikePrefabs[0], sawAttackPos1.transform.position, Quaternion.identity);
+                }
+            } else {
+                for (int i=0; i < 5; i++)
+                {
+                Debug.Log("Angled");
+                GameObject obj = Instantiate(spikePrefabs[1], sawAttackPos1.transform.position, Quaternion.identity);
+                obj.GetComponent<Rigidbody2D>().velocity = new Vector2(-5f, UnityEngine.Random.Range(-7f, 7f));
+                }
+            }
             currentSawAttack = Time.time + sawAttackCD;
         }
         // if(!playerFound)

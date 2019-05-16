@@ -12,6 +12,7 @@ public class SawProjectileScript : MonoBehaviour
     {
         rb2d = GetComponent<Rigidbody2D>();
         rb2d.velocity = Vector2.left * spikeSpeed;
+        
     }
 
     // Update is called once per frame

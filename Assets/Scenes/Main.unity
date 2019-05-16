@@ -3008,10 +3008,16 @@ MonoBehaviour:
   eyeR: {fileID: 258501699}
   eyeL: {fileID: 1390761641}
   InvulnerableInterval: 0.1
-  sawAttackCD: 5
+  sawAttackCD: 1
   sawAttackPos1: {fileID: 1913575416}
   sawPrefab: {fileID: 8543919760119094307, guid: 2e4ce4322b8334eedb304566b025b55b,
     type: 3}
+  sawPrefabIndestructible: {fileID: 7245431505302156827, guid: 6dd079170387f4346ba62b16ca5675aa,
+    type: 3}
+  spikePrefabs:
+  - {fileID: 8543919760119094307, guid: 2e4ce4322b8334eedb304566b025b55b, type: 3}
+  - {fileID: 7245431505302156827, guid: 6dd079170387f4346ba62b16ca5675aa, type: 3}
+  playerScript: {fileID: 1083097894727634775}
 --- !u!61 &2068092653
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -3184,7 +3190,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1083097893011379233}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.5, y: -0.3, z: 0}
+  m_LocalPosition: {x: 1.5, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1083097894727634793}
@@ -3228,7 +3234,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1083097893553617209}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -1, z: 0}
+  m_LocalPosition: {x: 0, y: -1.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1083097894727634793}
@@ -3280,7 +3286,7 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1.5, y: 3}
+  m_Size: {x: 1.6, y: 3}
   m_Direction: 0
 --- !u!50 &1083097894727634773
 Rigidbody2D:
@@ -3336,7 +3342,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 650
   stageCheck: {fileID: 1083097893553617190}
-  stageCheckRadius: 1
+  stageCheckRadius: 0.5
   whatIsStage:
     serializedVersion: 2
     m_Bits: 256
@@ -3344,13 +3350,13 @@ MonoBehaviour:
   jumpPower: 79500
   actOutOfJumpSpeed: 25
   dashDuration: 0.1
-  dashSpeed: 5000
+  dashSpeed: 2000
   dashLoft: 7
-  dashCD: 0.3
+  dashCD: 0.25
   totalAirDashes: 1
   ghost: {fileID: 1083097894727634770}
   meleeAttackDuration: 0.26
-  meleeAttackCD: 0.6
+  meleeAttackCD: 0.28
   totalAirMeleeAttacks: 1
   meleeHitBox: {fileID: 1083097893257244217}
   attackRangeX: 2.4
@@ -3358,6 +3364,7 @@ MonoBehaviour:
   whatAreEnemies:
     serializedVersion: 2
     m_Bits: 512
+  hitOnce: 0
   fireAttackDuration: 0.5
   fireAttackCD: 0.6
   shootFireDelay: 0.25

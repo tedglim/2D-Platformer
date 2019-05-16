@@ -13,6 +13,7 @@ TagManager:
   - PlayerDestructibles
   - EnemyDestructibles
   - PlayerHealth
+  - EnemyIndestructibles
   layers:
   - Default
   - TransparentFX
