@@ -57,6 +57,7 @@ public class PlayerScript : MonoBehaviour
     public float attackRangeX = 2.4f;
     public float attackRangeY = 2.5f;
     public bool hitMainEnemy;
+    public int dmgToMainEnemy = 20;
 
     //Fire Attack
     private bool canFire;
@@ -71,22 +72,24 @@ public class PlayerScript : MonoBehaviour
     public Transform firePoint;
     public GameObject firePrefab;
 
-    public int damage = 20;
     public float playerHealth = 20.0f;
     private float currentHealth;
-    public Image hpBar;
-    private float invincibleDuration;
-    public float invincibleCD = 1f;
-    private SpriteRenderer sr2d;
     private bool isHurt;
-    public float damagedFlashTime = .5f;
-    public float flashRotations = 2; 
+    public float damagedFlashTime = .4f;
+    public float flashRotations = 2;
+    private float nextInvincibleChance;
+    public float invincibleCD = .8f;
+    private SpriteRenderer sr2d;
+    public Image hpBar;
+
+
 
     // Use this for initialization
     void Start()
     {
         rb2d = this.GetComponent<Rigidbody2D>();
         anim = this.GetComponent<Animator>();
+        sr2d = GetComponent<SpriteRenderer>();
 
         //Move & Flip
         isFacingRight = true;
@@ -118,8 +121,9 @@ public class PlayerScript : MonoBehaviour
         currentFireAttackTime = fireAttackDuration;
         nextFireAttack = 0.0f;
 
+        //Player Health & Hurt
         currentHealth = playerHealth;
-        sr2d = GetComponent<SpriteRenderer>();
+        nextInvincibleChance = 0.0f;
         isHurt = false;
     }
 
@@ -259,6 +263,7 @@ public class PlayerScript : MonoBehaviour
     {
         anim.SetBool("isRunning", isRunning);
         anim.SetBool("onStage", onStage);
+        anim.SetBool("isHurt", isHurt);
         anim.SetFloat("yVel", rb2d.velocity.y);
     }
 
@@ -360,7 +365,7 @@ public class PlayerScript : MonoBehaviour
                 {
                     if (!hitMainEnemy)
                     {
-                        enemiesToDamage[i].GetComponent<EnemyMaceScript>().TakeDamage(damage);
+                        enemiesToDamage[i].GetComponent<EnemyMaceScript>().TakeDamage(dmgToMainEnemy);
                     }
                 }
                 // else if (enemiesToDamage[i].gameObject.tag == "EnemyDestructibles")
@@ -401,16 +406,15 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
-    public void takeDamage()
+    public void takeDamage(float damageTaken)
     {
-        if (Time.time > invincibleDuration)
+        if (Time.time > nextInvincibleChance)
         {
-            anim.SetTrigger("Hurt");
             rb2d.AddForce(new Vector2(-1000.0f, 2000.0f) * Time.deltaTime, ForceMode2D.Impulse);
-            currentHealth -= 1.0f;
+            currentHealth -= damageTaken;
             hpBar.fillAmount = currentHealth / playerHealth;
             StartCoroutine(DamageFlashing());
-            invincibleDuration = Time.time + invincibleCD;
+            nextInvincibleChance = Time.time + invincibleCD;
             Debug.Log("Took damage from enemy");
         }
     }

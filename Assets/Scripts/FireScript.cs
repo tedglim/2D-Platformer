@@ -5,7 +5,7 @@ using UnityEngine;
 public class FireScript : MonoBehaviour
 {
     private Rigidbody2D rb2d;
-    public GameObject player;
+    
     public int damage = 50;
     public float fireSpeed = 20f;
     public float fireMaxDistance = 25.0f;

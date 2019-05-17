@@ -6,55 +6,68 @@ using UnityEngine.UI;
 
 public class EnemyMaceScript : MonoBehaviour
 {
-    public float totalHealth = 100.0f;
-    private float health;
-    public float speed = 20f;
-    public float delay = 1f;
-    public Transform target;
-    private float posY;
     private Rigidbody2D rb2d;
-    private float timeLeft;
-    private bool playerFound;
-    private float offsetX = 2f;
-
-    public Image hpBar;
-    public Transform PlayerCheck;
-    public float PlayerCheckX;
-    public float PlayerCheckY;
     private SpriteRenderer sr2d;
-    private float elapsedInvulnerablTime;
-    public GameObject maceDeathEffect;
-    public float InvulnerableDuration = 1.0f;
-    private float colorChangeTime;
     public GameObject eyeR;
     public GameObject eyeL;
-    public float damagedFlashTime = .5f;
-    public float flashRotations = 2; 
-
-    public float InvulnerableInterval = .1f;
-    private CameraScript cam;
-    public float sawAttackCD = 1f;
-    private float currentSawAttack;
-    public Transform sawAttackPos1;
-    public GameObject sawPrefab;
-    public GameObject sawPrefabIndestructible;
-    public GameObject[] spikePrefabs;
     public PlayerScript playerScript;
+    private CameraScript cam;
+
+    public Image hpBar;
+    public float totalHealth = 100.0f;
+    private float health;
+    public float damagedFlashTime = .5f;
+    public float flashRotations = 2;
+    public float InvulnerableCD = 1.0f;
+    private float elapsedInvulnerablTime;
+    public GameObject maceDeathEffect;
+
+
+    public float damageDealt = 5f;
+    // public float speed = 20f;
+    // public float delay = 1f;
+    // public Transform target;
+    // private float posY;
+
+    // private float timeLeft;
+    // private bool playerFound;
+    // private float offsetX = 2f;
+
+
+    // public Transform PlayerCheck;
+    // public float PlayerCheckX;
+    // public float PlayerCheckY;
+
+    // private float colorChangeTime;
+
+
+
+    // public float InvulnerableInterval = .1f;
+
+    // public float sawAttackCD = 1f;
+    // private float currentSawAttack;
+    // public Transform sawAttackPos1;
+    // public GameObject sawPrefab;
+    // public GameObject sawPrefabIndestructible;
+    // public GameObject[] spikePrefabs;
+
 
     // Start is called before the first frame update
     void Start()
     {
         rb2d = GetComponent<Rigidbody2D>();
-        // target = GameObject.FindGameObjectWithTag("Player").GetComponent<Transform>();
-        // posY = transform.position.y;
-        // timeLeft = delay;
-        health = totalHealth;
         sr2d = GetComponent<SpriteRenderer>();
-        // elapsedInvulnerablTime = InvulnerableDuration;
         eyeR.SetActive(false);
         eyeL.SetActive(false);
         cam = GameObject.FindGameObjectWithTag("Camera").GetComponent<CameraScript>();
+        health = totalHealth;
+        elapsedInvulnerablTime = 0.0f;
         // currentSawAttack = 0.0f;
+        // target = GameObject.FindGameObjectWithTag("Player").GetComponent<Transform>();
+        // posY = transform.position.y;
+        // timeLeft = delay;
+
+
     }
 
     // Update is called once per frame
@@ -106,13 +119,14 @@ public class EnemyMaceScript : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        if(!playerScript.hitMainEnemy)
+        if(!playerScript.hitMainEnemy && Time.time > elapsedInvulnerablTime)
         {
             health -= damage;
             hpBar.fillAmount = health / totalHealth;
             cam.camShake();
             StartCoroutine(DamageFlashing());
             playerScript.hitMainEnemy = true;
+            elapsedInvulnerablTime = Time.time + InvulnerableCD;
         }
         if (health <= 0)
         {
@@ -122,19 +136,19 @@ public class EnemyMaceScript : MonoBehaviour
 
     private IEnumerator DamageFlashing()
     {
-        eyeR.SetActive(true);
-        eyeL.SetActive(true);
         for (int i = 0; i < flashRotations; i++)
         {
+            eyeR.SetActive(true);
+            eyeL.SetActive(true);
             sr2d.material.color = Color.red;
             yield return new WaitForSeconds(damagedFlashTime/2);
 
+            eyeR.SetActive(false);
+            eyeL.SetActive(false);
             sr2d.material.color = Color.white;
             yield return new WaitForSeconds(damagedFlashTime/2);
 
         }
-        eyeR.SetActive(false);
-        eyeL.SetActive(false);
     }
 
     private void Die()
@@ -149,7 +163,7 @@ public class EnemyMaceScript : MonoBehaviour
         if(hitInfo.gameObject.tag == "Player")
         {
             PlayerScript player = hitInfo.GetComponent<PlayerScript>();
-            player.takeDamage();
+            player.takeDamage(damageDealt);
         }
     }
 
@@ -158,7 +172,7 @@ public class EnemyMaceScript : MonoBehaviour
         if(hitInfo.gameObject.tag == "Player")
         {
             PlayerScript player = hitInfo.GetComponent<PlayerScript>();
-            player.takeDamage();
+            player.takeDamage(damageDealt);
         }
     }
 }

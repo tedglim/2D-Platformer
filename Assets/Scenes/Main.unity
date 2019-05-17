@@ -2994,32 +2994,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4af33db5293114afbb3a60a4b98eab31, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  totalHealth: 100
-  speed: 20
-  delay: 1
-  target: {fileID: 0}
-  hpBar: {fileID: 364872639}
-  PlayerCheck: {fileID: 526334785}
-  PlayerCheckX: 4
-  PlayerCheckY: 6
-  maceDeathEffect: {fileID: 3284244464023128808, guid: 811c46acc18544d2587f22344636a6c9,
-    type: 3}
-  InvulnerableDuration: 1
   eyeR: {fileID: 258501699}
   eyeL: {fileID: 1390761641}
+  playerScript: {fileID: 1083097894727634775}
+  hpBar: {fileID: 364872639}
+  totalHealth: 100
   damagedFlashTime: 0.5
   flashRotations: 2
-  InvulnerableInterval: 0.1
-  sawAttackCD: 1
-  sawAttackPos1: {fileID: 1913575416}
-  sawPrefab: {fileID: 8543919760119094307, guid: 2e4ce4322b8334eedb304566b025b55b,
+  InvulnerableCD: 1
+  maceDeathEffect: {fileID: 3284244464023128808, guid: 811c46acc18544d2587f22344636a6c9,
     type: 3}
-  sawPrefabIndestructible: {fileID: 7245431505302156827, guid: 6dd079170387f4346ba62b16ca5675aa,
-    type: 3}
-  spikePrefabs:
-  - {fileID: 8543919760119094307, guid: 2e4ce4322b8334eedb304566b025b55b, type: 3}
-  - {fileID: 7245431505302156827, guid: 6dd079170387f4346ba62b16ca5675aa, type: 3}
-  playerScript: {fileID: 1083097894727634775}
+  damageDealt: 5
 --- !u!61 &2068092653
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -3367,17 +3352,19 @@ MonoBehaviour:
   attackRangeX: 2.4
   attackRangeY: 2.5
   hitMainEnemy: 0
+  dmgToMainEnemy: 20
   fireAttackDuration: 1
-  fireAttackCD: 1
+  fireAttackCD: 3
   shootFireDelay: 0.6
   totalAirFireAttacks: 1
   firePoint: {fileID: 1083097893011379246}
   firePrefab: {fileID: 1661793301646624178, guid: 544db272f47894a7d845621bb6749960,
     type: 3}
-  damage: 20
   playerHealth: 20
+  damagedFlashTime: 0.4
+  flashRotations: 2
+  invincibleCD: 0.8
   hpBar: {fileID: 398878720}
-  invincibleCD: 1
 --- !u!212 &1083097894727634792
 SpriteRenderer:
   m_ObjectHideFlags: 0

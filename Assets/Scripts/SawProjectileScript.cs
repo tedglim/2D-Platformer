@@ -7,12 +7,13 @@ public class SawProjectileScript : MonoBehaviour
     public GameObject sawDeathEffect;
     private Rigidbody2D rb2d;
     public float spikeSpeed = 20f;
+    public float damageDealt = 1.0f;
+
     // Start is called before the first frame update
     void Awake()
     {
         rb2d = GetComponent<Rigidbody2D>();
         rb2d.velocity = Vector2.left * spikeSpeed;
-        
     }
 
     // Update is called once per frame
@@ -32,7 +33,7 @@ public class SawProjectileScript : MonoBehaviour
         {
             Debug.Log("Hit Player");
             PlayerScript player = hitInfo.GetComponent<PlayerScript>();
-            // player.takeDamage();
+            player.takeDamage(damageDealt);
         }
 
     }
