@@ -3007,6 +3007,8 @@ MonoBehaviour:
   InvulnerableDuration: 1
   eyeR: {fileID: 258501699}
   eyeL: {fileID: 1390761641}
+  damagedFlashTime: 0.5
+  flashRotations: 2
   InvulnerableInterval: 0.1
   sawAttackCD: 1
   sawAttackPos1: {fileID: 1913575416}
@@ -3342,32 +3344,32 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 650
   stageCheck: {fileID: 1083097893553617190}
-  stageCheckRadius: 0.5
   whatIsStage:
     serializedVersion: 2
     m_Bits: 256
-  totalJumps: 1
+  stageCheckRadius: 0.56
   jumpPower: 79500
-  actOutOfJumpSpeed: 25
-  dashDuration: 0.1
+  totalJumps: 1
+  actOutOfJumpSpeed: 15
   dashSpeed: 2000
   dashLoft: 7
+  dashDuration: 0.1
   dashCD: 0.25
   totalAirDashes: 1
   ghost: {fileID: 1083097894727634770}
-  meleeAttackDuration: 0.26
-  meleeAttackCD: 0.28
+  meleeAttackDuration: 0.32
+  meleeAttackCD: 0.32
   totalAirMeleeAttacks: 1
   meleeHitBox: {fileID: 1083097893257244217}
-  attackRangeX: 2.4
-  attackRangeY: 2.5
   whatAreEnemies:
     serializedVersion: 2
     m_Bits: 512
-  hitOnce: 0
-  fireAttackDuration: 0.5
-  fireAttackCD: 0.6
-  shootFireDelay: 0.25
+  attackRangeX: 2.4
+  attackRangeY: 2.5
+  hitMainEnemy: 0
+  fireAttackDuration: 1
+  fireAttackCD: 1
+  shootFireDelay: 0.6
   totalAirFireAttacks: 1
   firePoint: {fileID: 1083097893011379246}
   firePrefab: {fileID: 1661793301646624178, guid: 544db272f47894a7d845621bb6749960,

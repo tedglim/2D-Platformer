@@ -32,7 +32,7 @@ public class SawProjectileScript : MonoBehaviour
         {
             Debug.Log("Hit Player");
             PlayerScript player = hitInfo.GetComponent<PlayerScript>();
-            player.takeDamage();
+            // player.takeDamage();
         }
 
     }

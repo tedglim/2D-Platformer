@@ -21,25 +21,22 @@ public class PlayerScript : MonoBehaviour
     public float moveSpeed = 650f;
 
     //Jump
-    private bool wantsJump;
     private bool canJump;
     private bool onStage;
     public Transform stageCheck;
-    public float stageCheckRadius = .5f;
     public LayerMask whatIsStage;
+    public float stageCheckRadius = .56f;
+    public float jumpPower = 79500f;
     public int totalJumps = 1;
     private int jumpsLeft;
-    public float jumpPower = 79500f;
-    public float actOutOfJumpSpeed = 25.0f;
-
+    public float actOutOfJumpSpeed = 15.0f;
 
     //Dash
-    private bool wantsDash;
     private bool canDash;
-    public float dashDuration = 0.1f;
-    private float currentDashTime;
     public float dashSpeed = 5000f;
     public float dashLoft = 7.0f;
+    public float dashDuration = 0.1f;
+    private float currentDashTime;
     public float dashCD = .25f;
     private float nextDashTime;
     public int totalAirDashes = 1;
@@ -47,35 +44,32 @@ public class PlayerScript : MonoBehaviour
     public GhostScript ghost;
 
     //Melee Attack
-    private bool wantsMelee;
-    private bool canMeleeAttack;
-    public float meleeAttackDuration = .26f;
+    private bool canMelee;
+    public float meleeAttackDuration = .32f;
     private float currentMeleeAttackTime;
-    public float meleeAttackCD = .28f;
+    public float meleeAttackCD = .32f;
     private float nextMeleeAttackTime;
     public int totalAirMeleeAttacks = 1;
     private int airMeleeAttacksLeft;
     public GameObject meleeHitBox;
     private Collider2D[] enemiesToDamage;
+    public LayerMask whatAreEnemies;
     public float attackRangeX = 2.4f;
     public float attackRangeY = 2.5f;
-    public LayerMask whatAreEnemies;
-    public bool hitOnce;
+    public bool hitMainEnemy;
 
     //Fire Attack
-    private bool wantsFire;
     private bool canFire;
-    public float fireAttackDuration = .5f;
+    public float fireAttackDuration = 1.0f;
     private float currentFireAttackTime;
-    public float fireAttackCD = .6f;
+    public float fireAttackCD = 3.0f;
     private float nextFireAttack;
-    public float shootFireDelay = .25f;
+    public float shootFireDelay = .6f;
     private bool shotFire;
     public int totalAirFireAttacks = 1;
     private int airFireAttacksLeft;
     public Transform firePoint;
     public GameObject firePrefab;
-
 
     public int damage = 20;
     public float playerHealth = 20.0f;
@@ -85,6 +79,8 @@ public class PlayerScript : MonoBehaviour
     public float invincibleCD = 1f;
     private SpriteRenderer sr2d;
     private bool isHurt;
+    public float damagedFlashTime = .5f;
+    public float flashRotations = 2; 
 
     // Use this for initialization
     void Start()
@@ -98,28 +94,24 @@ public class PlayerScript : MonoBehaviour
         moveDirection = 0.0f;
 
         //Jump
-        wantsJump = false;
         canJump = false;
         onStage = false;
         jumpsLeft = totalJumps;
 
         //Dash
-        wantsDash = false;
         canDash = false;
         airDashesLeft = totalAirDashes;
         currentDashTime = dashDuration;
         nextDashTime = 0.0f;
 
         //Melee Attack
-        wantsMelee = false;
-        canMeleeAttack = false;
+        canMelee = false;
         airMeleeAttacksLeft = totalAirMeleeAttacks;
         currentMeleeAttackTime = meleeAttackDuration;
         nextMeleeAttackTime = 0.0f;
-        hitOnce = false;
+        hitMainEnemy = false;
 
         //Fire Attack
-        wantsFire = false;
         canFire = false;
         shotFire = false;
         airFireAttacksLeft = totalAirFireAttacks;
@@ -145,7 +137,7 @@ public class PlayerScript : MonoBehaviour
 
     private void CheckInputs()
     {
-        lockedActionOn = (wantsDash && canDash) || (wantsMelee && canMeleeAttack) || (wantsFire && canFire);
+        lockedActionOn = (canDash || canMelee || canFire);
         if (lockedActionOn)
         {
             return;
@@ -185,16 +177,17 @@ public class PlayerScript : MonoBehaviour
 
     private void Flip()
     {
-        isFacingRight = !isFacingRight;
-        transform.Rotate(0.0f, 180.0f, 0.0f);
+        if(!isHurt)
+        {
+            isFacingRight = !isFacingRight;
+            transform.Rotate(0.0f, 180.0f, 0.0f);
+        }
     }
 
     private void CheckJump()
     {
         if ((Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Space)))
         {
-            Debug.Log("Requested Jump");
-            wantsJump = true;
             if (jumpsLeft > 0 && !lockedActionOn)
             {
                 Debug.Log("Confirmed Jump Possible");
@@ -210,13 +203,9 @@ public class PlayerScript : MonoBehaviour
 
     private void CheckDash()
     {
-        if (!isHurt && moveDirection != 0 && (Input.GetKeyDown(KeyCode.RightShift) || Input.GetKeyDown(KeyCode.LeftShift)))
-        // if ((Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow)) && (Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift)))
-
+        if (moveDirection != 0 && (Input.GetKeyDown(KeyCode.RightShift) || Input.GetKeyDown(KeyCode.LeftShift)))
         {
-            Debug.Log("Requested Dash");
-            wantsDash = true;
-            if (Time.time > nextDashTime && airDashesLeft > 0 && rb2d.velocity.y <= actOutOfJumpSpeed && !lockedActionOn)
+            if (Time.time > nextDashTime && rb2d.velocity.y <= actOutOfJumpSpeed && airDashesLeft > 0 && !lockedActionOn)
             {
                 Debug.Log("Confirmed Dash Possible");
                 canDash = true;
@@ -232,31 +221,27 @@ public class PlayerScript : MonoBehaviour
 
     private void CheckMelee()
     {
-        if ((Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.E)) && !isHurt)
+        if ((Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.E)))
         {
-            Debug.Log("Requested Melee Attack");
-            wantsMelee = true;
-            if (Time.time > nextMeleeAttackTime && airMeleeAttacksLeft > 0 && rb2d.velocity.y <= actOutOfJumpSpeed && !lockedActionOn)
+            if (Time.time > nextMeleeAttackTime && rb2d.velocity.y <= actOutOfJumpSpeed && airMeleeAttacksLeft > 0 && !lockedActionOn)
             {
                 Debug.Log("Confirmed Melee Attack Possible");
-                canMeleeAttack = true;
+                canMelee = true;
                 nextMeleeAttackTime = Time.time + meleeAttackCD;
             }
             else
             {
                 Debug.Log("Confirmed Melee Attack NOT Possible");
-                canMeleeAttack = false;
+                canMelee = false;
             }
         }
     }
 
     private void CheckFire()
     {
-        if ((Input.GetKeyDown(KeyCode.Backslash) || Input.GetKeyDown(KeyCode.Q)) && !isHurt)
+        if ((Input.GetKeyDown(KeyCode.Backslash) || Input.GetKeyDown(KeyCode.Q)))
         {
-            Debug.Log("Requested Fire Attack");
-            wantsFire = true;
-            if (Time.time > nextFireAttack && airFireAttacksLeft > 0 && rb2d.velocity.y <= actOutOfJumpSpeed && !lockedActionOn)
+            if (Time.time > nextFireAttack && rb2d.velocity.y <= actOutOfJumpSpeed && airFireAttacksLeft > 0 && !lockedActionOn)
             {
                 Debug.Log("Confirmed Fire Attack Possible");
                 canFire = true;
@@ -282,13 +267,9 @@ public class PlayerScript : MonoBehaviour
         onStage = Physics2D.OverlapCircle(stageCheck.position, stageCheckRadius, whatIsStage);
         if (onStage)
         {
-            // Debug.Log("1 Available Air Dash");
             airDashesLeft = totalAirDashes;
-            // Debug.Log("1 Available Jump");
             jumpsLeft = totalJumps;
-            // Debug.Log("1 Available Air Melee Attack");
             airMeleeAttacksLeft = totalAirMeleeAttacks;
-            // Debug.Log("1 Available Air Fire Attack");
             airFireAttacksLeft = totalAirFireAttacks;
         }
         enemiesToDamage = Physics2D.OverlapBoxAll(meleeHitBox.transform.position, new Vector2(attackRangeX, attackRangeY), 0, whatAreEnemies);
@@ -296,29 +277,29 @@ public class PlayerScript : MonoBehaviour
 
     private void doMovement()
     {
-        if (wantsDash && canDash)
+        if (isHurt)
+        {
+            return;
+        }
+        else if (canDash)
         {
             Dash();
         }
-        else if (wantsMelee && canMeleeAttack)
+        else if (canMelee)
         {
             MeleeAttack();
         }
-        else if (wantsFire && canFire)
+        else if (canFire)
         {
             Fire();
         }
+        else if (canJump)
+        {
+            Jump();
+        }
         else
         {
-            if (wantsJump && canJump)
-            {
-                Jump();
-            }
-            if(!isHurt)
-            {
-                rb2d.velocity = new Vector2(moveSpeed * moveDirection * Time.deltaTime, rb2d.velocity.y);
-
-            }
+            rb2d.velocity = new Vector2(moveSpeed * moveDirection * Time.deltaTime, rb2d.velocity.y);
         }
     }
 
@@ -328,7 +309,7 @@ public class PlayerScript : MonoBehaviour
         rb2d.velocity = new Vector2(rb2d.velocity.x, 0f);
         rb2d.AddForce(Vector2.up * jumpPower * Time.deltaTime);
         jumpsLeft--;
-        wantsJump = false;
+        canJump = false;
         Debug.Log("Turned Off Jump Request");
     }
 
@@ -338,14 +319,17 @@ public class PlayerScript : MonoBehaviour
         {
             rb2d.velocity = Vector2.zero;
             ghost.makeGhost = false;
-            wantsDash = false;
+            canDash = false;
             airDashesLeft--;
             currentDashTime = dashDuration;
             Debug.Log("Turned Off Dash Request");
         }
         else
         {
-
+            if (currentDashTime == dashDuration)
+            {
+                Debug.Log("Performed Dash");
+            }
             rb2d.velocity = new Vector2(moveDirection * dashSpeed * Time.deltaTime, dashLoft);
             ghost.makeGhost = true;
             currentDashTime -= Time.deltaTime;
@@ -356,36 +340,36 @@ public class PlayerScript : MonoBehaviour
     {
         if (currentMeleeAttackTime <= 0)
         {
-            hitOnce = false;
-            wantsMelee = false;
+            hitMainEnemy = false;
+            canMelee = false;
             airMeleeAttacksLeft--;
             currentMeleeAttackTime = meleeAttackDuration;
             Debug.Log("Turned off Melee Request");
         }
-        else if (currentMeleeAttackTime <= meleeAttackDuration)
+        else
         {
             if (currentMeleeAttackTime == meleeAttackDuration)
             {
-                anim.SetTrigger("Melee");
                 Debug.Log("Performed Melee Attack");
+                anim.SetTrigger("Melee");
             }
-            rb2d.velocity = Vector2.zero;
             for (int i = 0; i < enemiesToDamage.Length; i++)
             {
-                Debug.Log("Detected object");
+                Debug.Log("Detected object " + i);
                 if (enemiesToDamage[i].gameObject.tag == "Enemy")
                 {
-                    if(!hitOnce)
+                    if (!hitMainEnemy)
                     {
                         enemiesToDamage[i].GetComponent<EnemyMaceScript>().TakeDamage(damage);
                     }
                 }
-                else if (enemiesToDamage[i].gameObject.tag == "EnemyDestructibles")
-                {
-                    Debug.Log("Hit Spike with Sword");
-                    enemiesToDamage[i].GetComponent<SawProjectileScript>().GetDestroyed();
-                }
+                // else if (enemiesToDamage[i].gameObject.tag == "EnemyDestructibles")
+                // {
+                //     Debug.Log("Hit Spike with Sword");
+                //     enemiesToDamage[i].GetComponent<SawProjectileScript>().GetDestroyed();
+                // }
             }
+            rb2d.velocity = Vector2.zero;
             currentMeleeAttackTime -= Time.deltaTime;
         }
     }
@@ -394,29 +378,26 @@ public class PlayerScript : MonoBehaviour
     {
         if (currentFireAttackTime <= 0)
         {
-            wantsFire = false;
+            canFire = false;
+            shotFire = false;
             airFireAttacksLeft--;
             currentFireAttackTime = fireAttackDuration;
             Debug.Log("Turned off Fire Request");
-
-        }
-        else if (currentFireAttackTime == fireAttackDuration)
+        } 
+        else 
         {
-            Debug.Log("Performed Fire Attack");
-            rb2d.velocity = Vector2.zero;
-            shotFire = false;
-            anim.SetTrigger("Fire");
-            currentFireAttackTime -= Time.deltaTime;
-        }
-        else
-        {
-            rb2d.velocity = Vector2.zero;
-            currentFireAttackTime -= Time.deltaTime;
-            if (currentFireAttackTime <= shootFireDelay && shotFire == false)
+            if (currentFireAttackTime == fireAttackDuration)
+            {
+                Debug.Log("Performed Fire Attack");
+                anim.SetTrigger("Fire");
+            }
+            if (currentFireAttackTime <= shootFireDelay && !shotFire)
             {
                 Instantiate(firePrefab, firePoint.position, firePoint.rotation);
                 shotFire = true;
             }
+            rb2d.velocity = Vector2.zero;
+            currentFireAttackTime -= Time.deltaTime;
         }
     }
 
@@ -425,9 +406,8 @@ public class PlayerScript : MonoBehaviour
         if (Time.time > invincibleDuration)
         {
             anim.SetTrigger("Hurt");
+            rb2d.AddForce(new Vector2(-1000.0f, 2000.0f) * Time.deltaTime, ForceMode2D.Impulse);
             currentHealth -= 1.0f;
-            rb2d.AddForce(Vector2.up * 2000f * Time.deltaTime, ForceMode2D.Impulse);
-            rb2d.AddForce(Vector2.left * 1000f * Time.deltaTime, ForceMode2D.Impulse);
             hpBar.fillAmount = currentHealth / playerHealth;
             StartCoroutine(DamageFlashing());
             invincibleDuration = Time.time + invincibleCD;
@@ -438,13 +418,13 @@ public class PlayerScript : MonoBehaviour
     private IEnumerator DamageFlashing()
     {
         isHurt = true;
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < flashRotations; i++)
         {
             sr2d.material.color = Color.red;
-            yield return new WaitForSeconds(.25f/2);
+            yield return new WaitForSeconds(damagedFlashTime / 2);
 
             sr2d.material.color = Color.white;
-            yield return new WaitForSeconds(.25f/2);
+            yield return new WaitForSeconds(damagedFlashTime / 2);
         }
         isHurt = false;
     }
