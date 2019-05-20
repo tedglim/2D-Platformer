@@ -6,6 +6,13 @@ using UnityEngine.UI;
 
 public class EnemyMaceScript : MonoBehaviour
 {
+    enum BossState {
+        Idle,
+        Jump,
+        COUNT
+    }
+    BossState currentState = BossState.Idle;
+
     private Rigidbody2D rb2d;
     private SpriteRenderer sr2d;
     public GameObject eyeR;
@@ -52,21 +59,22 @@ public class EnemyMaceScript : MonoBehaviour
     // public GameObject[] spikePrefabs;
 
 
+
     // Start is called before the first frame update
     void Start()
     {
         rb2d = GetComponent<Rigidbody2D>();
         sr2d = GetComponent<SpriteRenderer>();
-        eyeR.SetActive(false);
-        eyeL.SetActive(false);
         cam = GameObject.FindGameObjectWithTag("Camera").GetComponent<CameraScript>();
         health = totalHealth;
         elapsedInvulnerablTime = 0.0f;
+        // eyeR.SetActive(false);
+        // eyeL.SetActive(false);
         // currentSawAttack = 0.0f;
         // target = GameObject.FindGameObjectWithTag("Player").GetComponent<Transform>();
         // posY = transform.position.y;
         // timeLeft = delay;
-
+        GoToNextState();
 
     }
 
@@ -117,6 +125,31 @@ public class EnemyMaceScript : MonoBehaviour
 
     }
 
+    void GoToNextState()
+    {
+        BossState nextState = (BossState)UnityEngine.Random.Range(0, (int)BossState.COUNT);
+        string nextStateString = nextState.ToString();
+        string lastStateString = currentState.ToString();
+        currentState = nextState;
+        StopCoroutine(lastStateString);
+        StartCoroutine(nextStateString);
+    }
+
+    IEnumerator Idle()
+    {
+        yield return null;
+        Debug.Log("Idle");
+        GoToNextState();
+    }
+
+    IEnumerator Jump()
+    {
+        yield return null;
+        Debug.Log("Jump");
+        GoToNextState();
+
+    }
+
     public void TakeDamage(int damage)
     {
         if(!playerScript.hitMainEnemy && Time.time > elapsedInvulnerablTime)
@@ -138,13 +171,13 @@ public class EnemyMaceScript : MonoBehaviour
     {
         for (int i = 0; i < flashRotations; i++)
         {
-            eyeR.SetActive(true);
-            eyeL.SetActive(true);
+            // eyeR.SetActive(true);
+            // eyeL.SetActive(true);
             sr2d.material.color = Color.red;
             yield return new WaitForSeconds(damagedFlashTime/2);
 
-            eyeR.SetActive(false);
-            eyeL.SetActive(false);
+            // eyeR.SetActive(false);
+            // eyeL.SetActive(false);
             sr2d.material.color = Color.white;
             yield return new WaitForSeconds(damagedFlashTime/2);
 
