@@ -2363,6 +2363,36 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!1 &1294011366
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1294011367}
+  m_Layer: 9
+  m_Name: PatrolSpot01
+  m_TagString: Untagged
+  m_Icon: {fileID: 5132851093641282708, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1294011367
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1294011366}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 12.5, y: -5, z: 0}
+  m_LocalScale: {x: 2, y: 2, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1390761641
 GameObject:
   m_ObjectHideFlags: 0
@@ -2893,11 +2923,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2068092656}
+  - component: {fileID: 2068092657}
   - component: {fileID: 2068092655}
   - component: {fileID: 2068092654}
   - component: {fileID: 2068092653}
   - component: {fileID: 2068092652}
-  - component: {fileID: 2068092657}
   m_Layer: 9
   m_Name: Mace
   m_TagString: Enemy
@@ -2917,6 +2947,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4af33db5293114afbb3a60a4b98eab31, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  anim: {fileID: 0}
+  IntroDuration: 3
+  patrolIntroDuration: 2
+  patrolSpeed: 10
+  patrolDuration: 10
+  patrolSpots:
+  - {fileID: 1294011367}
+  - {fileID: 2094027352}
+  offset: 1
   eyeR: {fileID: 258501699}
   eyeL: {fileID: 1390761641}
   playerScript: {fileID: 1083097894727634775}
@@ -3040,7 +3079,7 @@ Transform:
   - {fileID: 1390761642}
   - {fileID: 1913575416}
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &2068092657
 Animator:
@@ -3052,7 +3091,7 @@ Animator:
   m_GameObject: {fileID: 2068092651}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 78b02e3b85f774478bbd983adab038e0, type: 2}
+  m_Controller: {fileID: 9100000, guid: 3cce695ae35c84b0e9f13b597591df39, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 1
@@ -3061,6 +3100,36 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!1 &2094027351
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2094027352}
+  m_Layer: 9
+  m_Name: PatrolSpot02
+  m_TagString: Untagged
+  m_Icon: {fileID: 5132851093641282708, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2094027352
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2094027351}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -12.5, y: -5, z: 0}
+  m_LocalScale: {x: 2, y: 2, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2126854188
 GameObject:
   m_ObjectHideFlags: 0
