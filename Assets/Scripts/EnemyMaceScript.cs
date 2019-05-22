@@ -10,7 +10,7 @@ public class EnemyMaceScript : MonoBehaviour
     enum BossState {
         Intro,
         Idle,
-        // Patrol,
+        Patrol,
         Jump,
         COUNT
     }
@@ -32,23 +32,17 @@ public class EnemyMaceScript : MonoBehaviour
 
     public float jumpIntroDuration = 2.0f;
     private float currJumpIntroTime;
-    private bool onStage;
-    public Transform stageCheck;
-    public LayerMask whatIsStage;
-    public float stageCheckRadius = 0.5f;
-    // public float jumpTimeDuration = 10.0f;
-    // private float currJumpTime;
     public int totalJumps = 4;
     private int jumpsLeft;
     public GameObject player;
     public float moveSpeed = 1000.0f;
     public float jumpPower = 1000.0f;
-    private bool jumped;
-
+    private Transform target;
+    private float originalHeight;
+    private Vector3 playerPos;
+    private Vector3 myPos;
+    private bool isJumping;
     
-
-
-
     private Rigidbody2D rb2d;
     private SpriteRenderer sr2d;
     public PlayerScript playerScript;
@@ -66,43 +60,6 @@ public class EnemyMaceScript : MonoBehaviour
 
 
 
-
-
-    // private bool isPatrolling;
-    // private int farthestIdx;
-    // private float farthest;
-    // private bool isPatrolIntro;
-    // private bool isJumping;
-
-    // public float speed = 20f;
-    // public float delay = 1f;
-    // public Transform target;
-    // private float posY;
-
-    // private float timeLeft;
-    // private bool playerFound;
-    // private float offsetX = 2f;
-
-
-    // public Transform PlayerCheck;
-    // public float PlayerCheckX;
-    // public float PlayerCheckY;
-
-    // private float colorChangeTime;
-
-
-
-    // public float InvulnerableInterval = .1f;
-
-    // public float sawAttackCD = 1f;
-    // private float currentSawAttack;
-    // public Transform sawAttackPos1;
-    // public GameObject sawPrefab;
-    // public GameObject sawPrefabIndestructible;
-    // public GameObject[] spikePrefabs;
-
-
-
     // Start is called before the first frame update
     void Start()
     {
@@ -114,49 +71,23 @@ public class EnemyMaceScript : MonoBehaviour
         currPatrolTime = patrolDuration;
         currentDestination = patrolSpots[0];
         currJumpIntroTime = jumpIntroDuration;
-        // currJumpTime = jumpTimeDuration;
         jumpsLeft = totalJumps;
-        jumped = false;
+        originalHeight = transform.position.y;
+        myPos = transform.position;
+        playerPos = player.transform.position;
+        isJumping = false;
+
 
         rb2d = GetComponent<Rigidbody2D>();
-        // rb2d.gravityScale = 0;
         sr2d = GetComponent<SpriteRenderer>();
         cam = GameObject.FindGameObjectWithTag("Camera").GetComponent<CameraScript>();
         health = totalHealth;
         elapsedInvulnerablTime = 0.0f;
-
-        // anim = GetComponent<Animator>();
-        // currentState = BossState.Intro;
-
-        // currIntroTime = IntroDuration;
-
-        // currPatrolIntroTime = patrolIntroDuration;
-        // isPatrolIntro = false;
-
-        // currIdleTime = idleDuration;
-
-        // farthestIdx = 0;
-        // farthest = 0.0f;
-        // currPatrolTime = patrolDuration;
-        // currentDestination = patrolSpots[0];
-
-        // isPatrolling = false;
-
-        // isJumping = false;
-        // eyeR.SetActive(false);
-        // eyeL.SetActive(false);
-        // currentSawAttack = 0.0f;
-        // target = GameObject.FindGameObjectWithTag("Player").GetComponent<Transform>();
-        // posY = transform.position.y;
-        // timeLeft = delay;
-        // GoToNextState();
-
     }
 
     // Update is called once per frame
     void Update()
     {
-        // CheckPlayerFound();
     }
 
     void FixedUpdate ()
@@ -184,18 +115,18 @@ public class EnemyMaceScript : MonoBehaviour
                 currIdleTime -= Time.deltaTime;
                 Debug.Log("Idling");
             }
-        // } else if (currentState == BossState.Patrol)
-        // {
-        //     if (currPatrolIntroTime <= 0){
-        //         Patrol();
-        //     } else {
-        //         if (currPatrolIntroTime == patrolIntroDuration)
-        //         {
-        //             anim.SetTrigger("isPatrolIntro");
-        //         }
-        //         currPatrolIntroTime -= Time.deltaTime;
-        //         Debug.Log("Patrol Intro");
-        //     }
+        } else if (currentState == BossState.Patrol)
+        {
+            if (currPatrolIntroTime <= 0){
+                Patrol();
+            } else {
+                if (currPatrolIntroTime == patrolIntroDuration)
+                {
+                    anim.SetTrigger("isPatrolIntro");
+                }
+                currPatrolIntroTime -= Time.deltaTime;
+                Debug.Log("Patrol Intro");
+            }
         } else if (currentState == BossState.Jump)
         {
             if (currJumpIntroTime <= 0)
@@ -244,225 +175,40 @@ public class EnemyMaceScript : MonoBehaviour
 
     private void Jump()
     {
-
-
-        // onStage = Physics2D.OverlapCircle(stageCheck.position, stageCheckRadius, whatIsStage);
-        // anim.SetBool("onStage", onStage);
-        // if (onStage && jumpsLeft <= 0)
-        // {
-        //     currentState = BossState.Idle;
-        //     currJumpIntroTime = jumpIntroDuration;
-        //     // currJumpTime = jumpTimeDuration;
-        //     jumpsLeft = totalJumps;
-        //     jumped = false;
-        // } else {
-        //     if (jumpsLeft > 0)
-        //     {
-        //         if(onStage && !jumped)
-        //         {
-                    
-        //             rb2d.AddForce(new Vector2(0.0f, jumpPower) * Time.deltaTime, ForceMode2D.Force);
-        //             jumpsLeft--;
-        //             jumped = true;
-        //             Debug.Log("Did Jump");
-
-        //         } else if (jumped)
-        //         {
-        //             if (player.transform.position.x < transform.position.x) {
-        //                 rb2d.velocity = new Vector2(-1 * moveSpeed * Time.deltaTime, rb2d.velocity.y);
-        //             } else if (player.transform.position.x > transform.position.x) 
-        //             {
-        //                 rb2d.velocity = new Vector2(1* moveSpeed * Time.deltaTime, rb2d.velocity.y);
-        //             }
-        //             if (rb2d.velocity.y == 0)
-        //             {
-        //                 jumped = false;
-        //             }
-        //         }
-        //     }
-        // }
+        if (rb2d.transform.position.y <= originalHeight)
+        {
+            rb2d.gravityScale = 0;
+            rb2d.velocity = Vector2.zero;
+            rb2d.transform.position = new Vector2(rb2d.transform.position.x, originalHeight);
+            if (jumpsLeft <= 0)
+            {
+                currentState = BossState.Idle;
+                jumpsLeft = totalJumps;
+            } else 
+            {
+                myPos = rb2d.transform.position;
+                playerPos = player.transform.position;
+                rb2d.AddForce(Vector2.up * jumpPower * Time.deltaTime, ForceMode2D.Impulse);
+                jumpsLeft--;
+                anim.SetTrigger("Jump");
+            }
+        } else 
+        {
+            rb2d.gravityScale = 1;
+            rb2d.velocity += Physics2D.gravity * Time.deltaTime;
+            if (rb2d.velocity.y < 0)
+            {
+                rb2d.velocity += Physics2D.gravity * Time.deltaTime;
+            }
+            if (playerPos.x <= myPos.x)
+            {
+                rb2d.velocity = new Vector2(-moveSpeed * Time.deltaTime, rb2d.velocity.y);
+            } else if (playerPos.x > myPos.x)
+            {
+                rb2d.velocity = new Vector2(moveSpeed * Time.deltaTime, rb2d.velocity.y);
+            }
+        }
     }
-
-    // private void CheckPlayerFound()
-    // {
-    //     // // Physics2D.OverlapBox()
-    //     // if (target.position.x < transform.position.x + offsetX && target.position.x > transform.position.x)
-    //     // {
-    //     //     // Debug.Log("player found");
-    //     //     playerFound = true;
-    //     // }
-    // }
-
-    // void OnDrawGizmos()
-    // {
-    //     Gizmos.DrawWireCube(PlayerCheck.position, new Vector3(PlayerCheckX, Player,0));
-    // }
-
-    // void FixedUpdate()
-    // {
-        // if (currentState == BossState.Intro && Time.time <= currIntroTime)
-        // {
-        //     Debug.Log("Intro");
-        //     return;
-        // } 
-        // else
-        // {
-        //     if (currIdleTime <= 0)
-        //     {
-        //         currentState = (BossState)UnityEngine.Random.Range(2, (int)BossState.COUNT);
-        //     } else {
-        //         Debug.Log("Idle");
-        //         if(currIdleTime == idleDuration)
-        //         {
-        //             anim.SetTrigger("isIdling");
-        //         }
-        //         currIdleTime -= Time.deltaTime;
-        //     }
-        // }
-        
-        // {
-            // if (!isPatrolling)
-            // {
-            //     currentState = (BossState)UnityEngine.Random.Range(2, (int)BossState.COUNT);
-                
-            //     //reset patrol times
-            //     // currPatrolIntroTime = patrolIntroDuration;
-            //     // currPatrolTime = patrolDuration;
-            //     // isPatrolIntro = false;
-
-            // }
-            // if (currentState == BossState.Patrol)
-            // {
-                // isPatrolling = true;
-                // Debug.Log("Patrol");
-                // Patrol();
-                // sr2d.material.color = Color.green;
-            // } 
-            // else if (currentState == BossState.Jump)
-            // {
-            //     Debug.Log("Jump");
-            //     sr2d.material.color = Color.yellow;
-            // }
-    //     }
-    // }
-
-    // private void Patrol()
-    // {
-    //     if (currPatrolIntroTime > 0)
-    //     {
-    //         if (currPatrolIntroTime == patrolIntroDuration)
-    //         {
-    //             anim.SetTrigger("isPatrolIntro");
-    //         }
-    //         Debug.Log("Patrol Intro");
-    //         currPatrolIntroTime -= Time.deltaTime;
-    //     } 
-    //     else 
-    //     {
-    //         if(currPatrolTime == patrolDuration)
-    //         {
-    //             anim.SetTrigger("isPatrolling");
-    //         }
-    //         if (currPatrolTime <= 0 && Vector2.Distance(transform.position, currentDestination.position) < offset)
-    //         {
-    //             currentState = BossState.Idle;
-    //             currIdleTime = idleDuration;
-    //             return;
-    //         }
-    //         while(Vector2.Distance(transform.position, currentDestination.position) < offset)
-    //         {
-    //             if (currentDestination == patrolSpots[0])
-    //             {
-    //                 currentDestination = patrolSpots[1];
-    //             } else if (currentDestination == patrolSpots[1])
-    //             {
-    //                 currentDestination = patrolSpots[0];
-    //             }
-    //             // currentDestination = patrolSpots[UnityEngine.Random.Range(0, patrolSpots.Length)];
-    //         }
-    //         transform.position = Vector2.MoveTowards(transform.position, currentDestination.position, patrolSpeed * Time.deltaTime);
-    //         currPatrolTime -= Time.deltaTime;
-
-            // //Patrol Intro over
-            // if (currPatrolTime <= 0 && Vector2.Distance(rb2d.transform.position, patrolSpots[farthestIdx].position) < offset)
-            // {
-            //     //Patrol Time over and reached location
-            //     //Stop Patrolling
-            //     Debug.Log("Stop Patrolling");
-            //     isPatrolling = false;
-            //     return;
-            // } else if (Vector2.Distance(rb2d.transform.position, patrolSpots[farthestIdx].position) < offset)
-            // {
-            //     Debug.Log("change points");
-            //     //choose next point to go to
-            //     for (int i = 0; i < patrolSpots.Length; i++)
-            //     {
-            //         float temp = Vector2.Distance(rb2d.transform.position, patrolSpots[i].position);
-            //         Debug.Log("temp: " + temp.ToString());
-            //         if (temp > farthest)
-            //         {
-            //             farthest = temp;
-            //             Debug.Log("farthest: " + farthest.ToString());
-            //             farthestIdx = i;
-            //         }
-            //     }
-            // } else 
-            // {
-            //     rb2d.transform.position = Vector2.MoveTowards(rb2d.transform.position, patrolSpots[farthestIdx].position, patrolSpeed * Time.deltaTime);
-                // isPatrolling = true;
-                // anim.SetBool("isPatrolling", isPatrolling);
-            //     currPatrolTime -= Time.deltaTime;
-            //     Debug.Log("Is Patrolling: " + currPatrolTime.ToString());
-            // }
-    //     }
-    // }
-
-    // if (Time.time > currentSawAttack)
-    // {
-    //     if (UnityEngine.Random.Range(0, 2) == 0)
-    //     {
-    //         for (int i=0; i < 5; i++)
-    //         {
-    //         GameObject obj = Instantiate(spikePrefabs[0], sawAttackPos1.position, Quaternion.identity);
-    //         obj.GetComponent<Rigidbody2D>().velocity = new Vector2(-5f, UnityEngine.Random.Range(-7f, 7f));
-    //         // GameObject object = Instantiate(spikePrefabs[0], sawAttackPos1.transform.position, Quaternion.identity);
-    //         }
-    //     } else {
-    //         for (int i=0; i < 5; i++)
-    //         {
-    //         Debug.Log("Angled");
-    //         GameObject obj = Instantiate(spikePrefabs[1], sawAttackPos1.transform.position, Quaternion.identity);
-    //         obj.GetComponent<Rigidbody2D>().velocity = new Vector2(-5f, UnityEngine.Random.Range(-7f, 7f));
-    //         }
-    //     }
-    //     currentSawAttack = Time.time + sawAttackCD;
-    // }
-
-
-    // void GoToNextState()
-    // {
-    //     BossState nextState = (BossState)UnityEngine.Random.Range(0, (int)BossState.COUNT);
-    //     string nextStateString = nextState.ToString();
-    //     string lastStateString = currentState.ToString();
-    //     currentState = nextState;
-    //     StopCoroutine(lastStateString);
-    //     StartCoroutine(nextStateString);
-    // }
-
-    // IEnumerator Patrol()
-    // {
-    //     yield return null;
-    //     Debug.Log("Idle");
-    //     // GoToNextState();
-    // }
-
-    // IEnumerator Jump()
-    // {
-    //     yield return null;
-    //     Debug.Log("Jump");
-    //     GoToNextState();
-
-    // }
 
     public void TakeDamage(int damage)
     {
@@ -508,6 +254,9 @@ public class EnemyMaceScript : MonoBehaviour
         {
             PlayerScript player = hitInfo.GetComponent<PlayerScript>();
             player.takeDamage(damageDealt);
+        } else if (hitInfo.gameObject.tag == "Bounds")
+        {
+            rb2d.velocity = new Vector2 (0.0f, rb2d.velocity.y);
         }
     }
 
@@ -517,6 +266,9 @@ public class EnemyMaceScript : MonoBehaviour
         {
             PlayerScript player = hitInfo.GetComponent<PlayerScript>();
             player.takeDamage(damageDealt);
+        } else if (hitInfo.gameObject.tag == "Bounds")
+        {
+            rb2d.velocity = new Vector2 (0.0f, rb2d.velocity.y);
         }
     }
 }
