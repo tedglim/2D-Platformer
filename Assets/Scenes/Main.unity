@@ -2987,15 +2987,10 @@ MonoBehaviour:
   offset: 1
   patrolSpeed: 10
   jumpIntroDuration: 2
-  stageCheck: {fileID: 1798605292}
-  whatIsStage:
-    serializedVersion: 2
-    m_Bits: 256
-  stageCheckRadius: 0.5
   totalJumps: 4
   player: {fileID: 1083097894727634795}
-  moveSpeed: 250
-  jumpPower: 600
+  moveSpeed: 300
+  jumpPower: 750
   playerScript: {fileID: 1083097894727634775}
   maceDeathEffect: {fileID: 3284244464023128808, guid: 811c46acc18544d2587f22344636a6c9,
     type: 3}
@@ -3403,18 +3398,14 @@ MonoBehaviour:
   attackRangeY: 2.5
   hitMainEnemy: 0
   dmgToMainEnemy: 20
-  fireAttackDuration: 1
-  fireAttackCD: 3
-  shootFireDelay: 0.6
-  totalAirFireAttacks: 1
-  firePoint: {fileID: 1083097893011379246}
-  firePrefab: {fileID: 1661793301646624178, guid: 544db272f47894a7d845621bb6749960,
-    type: 3}
   playerHealth: 20
-  damagedFlashTime: 0.4
+  damagedFlashTime: 0.5
   flashRotations: 2
-  invincibleCD: 0.8
+  invincibleCD: 1.5
   hpBar: {fileID: 398878720}
+  maceEnemy: {fileID: 2068092651}
+  horizontalHurtForce: 750
+  verticalHurtForce: 2000
 --- !u!212 &1083097894727634792
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -3471,7 +3462,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1083097894727634795}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -10.5, y: -5, z: 0}
+  m_LocalPosition: {x: -10.5, y: -5.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1083097893553617190}

@@ -60,20 +60,23 @@ public class PlayerScript : MonoBehaviour
     public int dmgToMainEnemy = 20;
 
     //Fire Attack
-    private bool canFire;
-    public float fireAttackDuration = 1.0f;
-    private float currentFireAttackTime;
-    public float fireAttackCD = 3.0f;
-    private float nextFireAttack;
-    public float shootFireDelay = .6f;
-    private bool shotFire;
-    public int totalAirFireAttacks = 1;
-    private int airFireAttacksLeft;
-    public Transform firePoint;
-    public GameObject firePrefab;
+    // private bool canFire;
+    // public float fireAttackDuration = 1.0f;
+    // private float currentFireAttackTime;
+    // public float fireAttackCD = 3.0f;
+    // private float nextFireAttack;
+    // public float shootFireDelay = .6f;
+    // private bool shotFire;
+    // public int totalAirFireAttacks = 1;
+    // private int airFireAttacksLeft;
+    // public Transform firePoint;
+    // public GameObject firePrefab;
 
+    //Health
     public float playerHealth = 20.0f;
     private float currentHealth;
+
+    //Hurt animation
     private bool isHurt;
     public float damagedFlashTime = .4f;
     public float flashRotations = 2;
@@ -82,6 +85,10 @@ public class PlayerScript : MonoBehaviour
     private SpriteRenderer sr2d;
     public Image hpBar;
 
+    public GameObject maceEnemy;
+    public float horizontalHurtForce = 1000.0f;
+    public float verticalHurtForce = 2000.0f;
+    private CameraScript cam;
 
 
     // Use this for initialization
@@ -115,16 +122,18 @@ public class PlayerScript : MonoBehaviour
         hitMainEnemy = false;
 
         //Fire Attack
-        canFire = false;
-        shotFire = false;
-        airFireAttacksLeft = totalAirFireAttacks;
-        currentFireAttackTime = fireAttackDuration;
-        nextFireAttack = 0.0f;
+        // canFire = false;
+        // shotFire = false;
+        // airFireAttacksLeft = totalAirFireAttacks;
+        // currentFireAttackTime = fireAttackDuration;
+        // nextFireAttack = 0.0f;
 
         //Player Health & Hurt
         currentHealth = playerHealth;
         nextInvincibleChance = 0.0f;
         isHurt = false;
+        cam = GameObject.FindGameObjectWithTag("Camera").GetComponent<CameraScript>();
+
     }
 
     void Update()
@@ -141,7 +150,9 @@ public class PlayerScript : MonoBehaviour
 
     private void CheckInputs()
     {
-        lockedActionOn = (canDash || canMelee || canFire);
+        // lockedActionOn = (canDash || canMelee || canFire);
+        lockedActionOn = (canDash || canMelee);
+
         if (lockedActionOn)
         {
             return;
@@ -153,7 +164,7 @@ public class PlayerScript : MonoBehaviour
             CheckJump();
             CheckDash();
             CheckMelee();
-            CheckFire();
+            // CheckFire();
         }
     }
 
@@ -241,23 +252,23 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
-    private void CheckFire()
-    {
-        if ((Input.GetKeyDown(KeyCode.Backslash) || Input.GetKeyDown(KeyCode.Q)))
-        {
-            if (Time.time > nextFireAttack && rb2d.velocity.y <= actOutOfJumpSpeed && airFireAttacksLeft > 0 && !lockedActionOn)
-            {
-                Debug.Log("Confirmed Fire Attack Possible");
-                canFire = true;
-                nextFireAttack = Time.time + fireAttackCD;
-            }
-            else
-            {
-                Debug.Log("Confiremd Fire Attack NOT Possible");
-                canFire = false;
-            }
-        }
-    }
+    // private void CheckFire()
+    // {
+    //     if ((Input.GetKeyDown(KeyCode.Backslash) || Input.GetKeyDown(KeyCode.Q)))
+    //     {
+    //         if (Time.time > nextFireAttack && rb2d.velocity.y <= actOutOfJumpSpeed && airFireAttacksLeft > 0 && !lockedActionOn)
+    //         {
+    //             Debug.Log("Confirmed Fire Attack Possible");
+    //             canFire = true;
+    //             nextFireAttack = Time.time + fireAttackCD;
+    //         }
+    //         else
+    //         {
+    //             Debug.Log("Confiremd Fire Attack NOT Possible");
+    //             canFire = false;
+    //         }
+    //     }
+    // }
 
     void UpdateAnimations()
     {
@@ -275,7 +286,7 @@ public class PlayerScript : MonoBehaviour
             airDashesLeft = totalAirDashes;
             jumpsLeft = totalJumps;
             airMeleeAttacksLeft = totalAirMeleeAttacks;
-            airFireAttacksLeft = totalAirFireAttacks;
+            // airFireAttacksLeft = totalAirFireAttacks;
         }
         enemiesToDamage = Physics2D.OverlapBoxAll(meleeHitBox.transform.position, new Vector2(attackRangeX, attackRangeY), 0, whatAreEnemies);
     }
@@ -294,10 +305,10 @@ public class PlayerScript : MonoBehaviour
         {
             MeleeAttack();
         }
-        else if (canFire)
-        {
-            Fire();
-        }
+        // else if (canFire)
+        // {
+        //     Fire();
+        // }
         else if (canJump)
         {
             Jump();
@@ -379,38 +390,39 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
-    private void Fire()
-    {
-        if (currentFireAttackTime <= 0)
-        {
-            canFire = false;
-            shotFire = false;
-            airFireAttacksLeft--;
-            currentFireAttackTime = fireAttackDuration;
-            Debug.Log("Turned off Fire Request");
-        } 
-        else 
-        {
-            if (currentFireAttackTime == fireAttackDuration)
-            {
-                Debug.Log("Performed Fire Attack");
-                anim.SetTrigger("Fire");
-            }
-            if (currentFireAttackTime <= shootFireDelay && !shotFire)
-            {
-                Instantiate(firePrefab, firePoint.position, firePoint.rotation);
-                shotFire = true;
-            }
-            rb2d.velocity = Vector2.zero;
-            currentFireAttackTime -= Time.deltaTime;
-        }
-    }
+    // private void Fire()
+    // {
+    //     if (currentFireAttackTime <= 0)
+    //     {
+    //         canFire = false;
+    //         shotFire = false;
+    //         airFireAttacksLeft--;
+    //         currentFireAttackTime = fireAttackDuration;
+    //         Debug.Log("Turned off Fire Request");
+    //     } 
+    //     else 
+    //     {
+    //         if (currentFireAttackTime == fireAttackDuration)
+    //         {
+    //             Debug.Log("Performed Fire Attack");
+    //             anim.SetTrigger("Fire");
+    //         }
+    //         if (currentFireAttackTime <= shootFireDelay && !shotFire)
+    //         {
+    //             Instantiate(firePrefab, firePoint.position, firePoint.rotation);
+    //             shotFire = true;
+    //         }
+    //         rb2d.velocity = Vector2.zero;
+    //         currentFireAttackTime -= Time.deltaTime;
+    //     }
+    // }
 
     public void takeDamage(float damageTaken)
     {
         if (Time.time > nextInvincibleChance)
         {
-            rb2d.AddForce(new Vector2(-1000.0f, 2000.0f) * Time.deltaTime, ForceMode2D.Impulse);
+            rb2d.velocity = Vector2.zero;
+            cam.camShake();
             currentHealth -= damageTaken;
             hpBar.fillAmount = currentHealth / playerHealth;
             StartCoroutine(DamageFlashing());

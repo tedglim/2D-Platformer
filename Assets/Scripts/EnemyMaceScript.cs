@@ -198,14 +198,26 @@ public class EnemyMaceScript : MonoBehaviour
             rb2d.velocity += Physics2D.gravity * Time.deltaTime;
             if (rb2d.velocity.y < 0)
             {
-                rb2d.velocity += Physics2D.gravity * Time.deltaTime;
+                rb2d.velocity += 2*Physics2D.gravity * Time.deltaTime;
             }
-            if (playerPos.x <= myPos.x)
+            if (playerPos.x <= myPos.x && myPos.x < patrolSpots[0].position.x && myPos.x > patrolSpots[1].position.x)
             {
+                Debug.Log("Left");
                 rb2d.velocity = new Vector2(-moveSpeed * Time.deltaTime, rb2d.velocity.y);
-            } else if (playerPos.x > myPos.x)
+                if (transform.position.x < patrolSpots[1].position.x + 1.0f)
+                {
+                    Debug.Log("Too Far Left");
+                    rb2d.velocity = new Vector2(10f * Time.deltaTime, rb2d.velocity.y);
+                }
+            } else if (playerPos.x > myPos.x && myPos.x < patrolSpots[0].position.x && myPos.x > patrolSpots[1].position.x)
             {
+                Debug.Log("Right");
                 rb2d.velocity = new Vector2(moveSpeed * Time.deltaTime, rb2d.velocity.y);
+                 if (transform.position.x > patrolSpots[0].position.x - 1.0f)
+                {
+                    Debug.Log("Too Far Right");
+                    rb2d.velocity = new Vector2(-10f * Time.deltaTime, rb2d.velocity.y);
+                }
             }
         }
     }
